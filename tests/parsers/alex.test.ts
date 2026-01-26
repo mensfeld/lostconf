@@ -72,17 +72,14 @@ describe('alexRcParser', () => {
     expect(alexRcParser.filePatterns).toContain('.alexrc.json');
   });
 
-  it('should parse allow list', () => {
+  it('should not parse allow list (linguistic terms, not paths)', () => {
     const content = `{
   "allow": ["boogeyman", "garbageman", "mailman"]
 }`;
     const patterns = alexRcParser.parse('.alexrc', content);
 
-    expect(patterns).toHaveLength(3);
-    expect(patterns[0].value).toBe('boogeyman');
-    expect(patterns[0].type).toBe(PatternType.PATH);
-    expect(patterns[1].value).toBe('garbageman');
-    expect(patterns[2].value).toBe('mailman');
+    // The 'allow' field contains words to allow, not file paths
+    expect(patterns).toHaveLength(0);
   });
 
   it('should handle empty config', () => {
@@ -92,7 +89,7 @@ describe('alexRcParser', () => {
     expect(patterns).toHaveLength(0);
   });
 
-  it('should handle config without allow field', () => {
+  it('should handle config with profanitySureness', () => {
     const content = `{
   "profanitySureness": 1
 }`;
@@ -106,19 +103,5 @@ describe('alexRcParser', () => {
     const patterns = alexRcParser.parse('.alexrc', content);
 
     expect(patterns).toHaveLength(0);
-  });
-
-  it('should track line numbers', () => {
-    const content = `{
-  "allow": [
-    "boogeyman",
-    "garbageman"
-  ]
-}`;
-    const patterns = alexRcParser.parse('.alexrc', content);
-
-    expect(patterns).toHaveLength(2);
-    expect(patterns[0].line).toBe(3);
-    expect(patterns[1].line).toBe(4);
   });
 });

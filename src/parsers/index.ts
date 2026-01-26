@@ -27,6 +27,10 @@ export { pyrightParser } from './pyright.js';
 
 // Ruby
 export { rubocopParser } from './rubocop.js';
+export { brakemanParser } from './brakeman.js';
+export { reekParser } from './reek.js';
+export { bundlerAuditParser } from './bundler-audit.js';
+export { yardLintParser } from './yard-lint.js';
 
 // Go
 export { golangciParser } from './golangci.js';
@@ -114,6 +118,10 @@ import { pylintrcParser } from './pylint.js';
 import { banditParser } from './bandit.js';
 import { pyrightParser } from './pyright.js';
 import { rubocopParser } from './rubocop.js';
+import { brakemanParser } from './brakeman.js';
+import { reekParser } from './reek.js';
+import { bundlerAuditParser } from './bundler-audit.js';
+import { yardLintParser } from './yard-lint.js';
 import { golangciParser } from './golangci.js';
 import { rustfmtParser, clippyParser } from './rust.js';
 import { checkstyleParser, pmdParser, spotbugsParser } from './java.js';
@@ -169,6 +177,10 @@ export function getBuiltinParsers(): Parser[] {
 
     // Ruby
     rubocopParser,
+    brakemanParser,
+    reekParser,
+    bundlerAuditParser,
+    yardLintParser,
 
     // Go
     golangciParser,

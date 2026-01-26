@@ -47,60 +47,15 @@ function parseAlexIgnore(_filename: string, content: string): Pattern[] {
 }
 
 /** Parse .alexrc/.alexrc.json configuration */
-function parseAlexRc(_filename: string, content: string): Pattern[] {
+function parseAlexRc(_filename: string, _content: string): Pattern[] {
   const patterns: Pattern[] = [];
 
-  let config: { allow?: string[] };
-  try {
-    config = JSON.parse(content);
-  } catch {
-    return patterns;
-  }
-
-  if (!config || typeof config !== 'object') {
-    return patterns;
-  }
-
-  const lineMap = buildLineMap(content);
-
-  // Extract 'allow' patterns - these are words/phrases to allow
-  if (Array.isArray(config.allow)) {
-    for (const value of config.allow) {
-      if (typeof value !== 'string') continue;
-      const lineInfo = lineMap.get(value);
-
-      // Allow patterns are typically simple strings (words/phrases), not file paths
-      // We'll treat them as PATH type for validation purposes
-      patterns.push({
-        value,
-        type: PatternType.PATH,
-        line: lineInfo?.line ?? 1,
-        column: lineInfo?.column
-      });
-    }
-  }
+  // Note: The 'allow' field in .alexrc contains linguistic terms (words/phrases),
+  // not filesystem paths. These cannot be validated against the filesystem,
+  // so we intentionally skip parsing them.
+  // Example: ["boogeyman", "garbageman"] are words to allow, not file paths.
 
   return patterns;
-}
-
-function buildLineMap(content: string): Map<string, { line: number; column?: number }> {
-  const map = new Map<string, { line: number; column?: number }>();
-  const lines = content.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNum = i + 1;
-
-    const stringMatches = line.matchAll(/"([^"]+)"/g);
-    for (const match of stringMatches) {
-      const value = match[1];
-      if (value && !map.has(value)) {
-        map.set(value, { line: lineNum, column: (match.index ?? 0) + 1 });
-      }
-    }
-  }
-
-  return map;
 }
 
 /** alex ignore file parser */

@@ -33,7 +33,7 @@ interface BufWorkConfig {
 }
 
 /** Parse buf.yaml or buf.work.yaml configuration */
-function parseBuf(filename: string, content: string): Pattern[] {
+function parseBuf(_filename: string, content: string): Pattern[] {
   const patterns: Pattern[] = [];
 
   let config: BufConfig | BufWorkConfig;

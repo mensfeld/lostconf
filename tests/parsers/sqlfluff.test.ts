@@ -8,7 +8,7 @@ describe('sqlfluffParser', () => {
     expect(sqlfluffParser.filePatterns).toContain('.sqlfluff');
   });
 
-  it('should parse exclude_rules', () => {
+  it('should not parse exclude_rules (rule IDs, not paths)', () => {
     const content = `
 [sqlfluff]
 exclude_rules = L001, L002, L003
@@ -16,10 +16,8 @@ dialect = postgres
 `;
     const patterns = sqlfluffParser.parse('.sqlfluff', content);
 
-    expect(patterns).toHaveLength(3);
-    expect(patterns[0].value).toBe('L001');
-    expect(patterns[1].value).toBe('L002');
-    expect(patterns[2].value).toBe('L003');
+    // exclude_rules contains rule IDs, not file paths
+    expect(patterns).toHaveLength(0);
   });
 
   it('should parse ignore patterns', () => {
@@ -59,20 +57,20 @@ template_path = templates/, custom/templates/
     expect(patterns[1].value).toBe('custom/templates/');
   });
 
-  it('should handle continuation lines', () => {
+  it('should handle continuation lines for path fields', () => {
     const content = `
 [sqlfluff]
-exclude_rules =
-    L001
-    L002
-    L003
+ignore =
+    migrations/
+    legacy/
+    temp/
 `;
     const patterns = sqlfluffParser.parse('.sqlfluff', content);
 
     expect(patterns).toHaveLength(3);
-    expect(patterns[0].value).toBe('L001');
-    expect(patterns[1].value).toBe('L002');
-    expect(patterns[2].value).toBe('L003');
+    expect(patterns[0].value).toBe('migrations/');
+    expect(patterns[1].value).toBe('legacy/');
+    expect(patterns[2].value).toBe('temp/');
   });
 
   it('should skip non-sqlfluff sections', () => {

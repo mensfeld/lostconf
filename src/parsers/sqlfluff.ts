@@ -9,7 +9,7 @@ import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
 
 /** Parse .sqlfluff or setup.cfg file */
-function parseSqlfluff(filename: string, content: string): Pattern[] {
+function parseSqlfluff(_filename: string, content: string): Pattern[] {
   const patterns: Pattern[] = [];
   const lines = content.split('\n');
 
@@ -60,14 +60,9 @@ function parseSqlfluff(filename: string, content: string): Pattern[] {
 
 /** Check if a key is a path-related field */
 function isPathField(key: string): boolean {
-  return [
-    'exclude_rules',
-    'ignore',
-    'ignore_templated_areas',
-    'template_path',
-    'library_path',
-    'sql_file_exts'
-  ].includes(key);
+  return ['ignore', 'ignore_templated_areas', 'template_path', 'library_path'].includes(key);
+  // Note: exclude_rules contains rule IDs (L001, L002), not paths
+  // Note: sql_file_exts contains file extensions (.sql, .sql.j2), not paths
 }
 
 /** Extract patterns from a value string */

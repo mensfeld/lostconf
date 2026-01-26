@@ -56,8 +56,9 @@ function parseCommitlintConfig(_filename: string, content: string): Pattern[] {
     for (const value of config.extends) {
       if (typeof value !== 'string') continue;
 
-      // Skip npm package names (start with @)
-      if (value.startsWith('@') || value.startsWith('.') === false) {
+      // Skip npm package names (start with @ or don't start with . or /)
+      // Only include relative paths (./...) or absolute paths (/...)
+      if (value.startsWith('@') || (!value.startsWith('.') && !value.startsWith('/'))) {
         continue;
       }
 

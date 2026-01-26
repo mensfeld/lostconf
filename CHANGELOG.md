@@ -19,8 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **SQLFluff** (`.sqlfluff`, `setup.cfg`) - SQL linter supporting 24+ dialects
   - **buf** (`buf.yaml`, `buf.work.yaml`) - Protocol Buffers linter and generator
   - **alex** (`.alexignore`, `.alexrc`, `.alexrc.json`) - Inclusive language linter
-- Total supported configuration files increased from 48+ to 58+
-- Comprehensive test coverage with 100+ new tests for all new parsers
+- Support for 4 essential Ruby/Rails linters:
+  - **Brakeman** (`config/brakeman.yml`, `.brakeman.yml`) - Security vulnerability scanner for Rails
+  - **Reek** (`.reek.yml`, `.reek`, `config.reek`) - Code smell detector for Ruby
+  - **bundler-audit** (`.bundler-audit.yml`) - Dependency vulnerability scanner
+  - **YARD-Lint** (`.yard-lint.yml`) - Documentation linter for YARD docs
+- Total supported configuration files increased from 48+ to 62+
+- Comprehensive test coverage with 140+ new tests for all new parsers
 
 ### Changed
 - Updated README with new linter documentation and usage examples

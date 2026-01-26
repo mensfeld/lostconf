@@ -115,7 +115,7 @@ npx lostconf --exclude "**/test/**" --exclude "**/tests/**"
 
 ## Supported Config Files
 
-lostconf supports **58+ configuration files** from popular tools across **15+ languages**:
+lostconf supports **62+ configuration files** from popular tools across **15+ languages**:
 
 | Language/Category | Tool | Config File(s) | What We Check |
 |-------------------|------|----------------|---------------|
@@ -137,6 +137,10 @@ lostconf supports **58+ configuration files** from popular tools across **15+ la
 | | Pyright | `pyrightconfig.json` | `include`, `exclude`, `ignore`, `extraPaths` patterns |
 | **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Exclude patterns, ignore patterns, template paths |
 | **Ruby** | RuboCop | `.rubocop.yml` | Exclude patterns, Include patterns in AllCops |
+| | Brakeman | `config/brakeman.yml`, `.brakeman.yml` | Patterns in `skip-files` and `only-files` |
+| | Reek | `.reek.yml`, `.reek`, `config.reek` | Directory paths in `exclude_paths` |
+| | bundler-audit | `.bundler-audit.yml` | Advisory IDs in `ignore` (CVE, OSVDB, GHSA) |
+| | YARD-Lint | `.yard-lint.yml` | File patterns in global and per-validator `Exclude` |
 | **Go** | golangci-lint | `.golangci.yml` | Skip-dirs, skip-files, exclude patterns |
 | **Rust** | rustfmt | `rustfmt.toml` | Ignore patterns |
 | | Clippy | `clippy.toml` | Excluded files |
