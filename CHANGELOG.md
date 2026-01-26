@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Support for 10 new popular linters and configuration tools:
+  - **ESLint Flat Config** (`eslint.config.json`) - New ESLint v9+ flat configuration format (JSON only)
+  - **Oxlint** (`.oxlintrc.json`) - Fast Rust-based JavaScript/TypeScript linter
+  - **commitlint** (`.commitlintrc`, `.commitlintrc.json`) - Commit message linting
+  - **lint-staged** (`.lintstagedrc`, `.lintstagedrc.json`) - Run linters on staged files
+  - **lefthook** (`lefthook.yml`, `.lefthook.yml`) - Fast Go-based git hooks manager
+  - **pre-commit** (`.pre-commit-config.yaml`) - Python-based git hooks framework
+  - **ansible-lint** (`.ansible-lint`, `.ansible-lint.yaml`) - Ansible playbook linter
+  - **SQLFluff** (`.sqlfluff`, `setup.cfg`) - SQL linter supporting 24+ dialects
+  - **buf** (`buf.yaml`, `buf.work.yaml`) - Protocol Buffers linter and generator
+  - **alex** (`.alexignore`, `.alexrc`, `.alexrc.json`) - Inclusive language linter
+- Total supported configuration files increased from 48+ to 58+
+- Comprehensive test coverage with 100+ new tests for all new parsers
+
+### Changed
+- Updated README with new linter documentation and usage examples
+
 ## [0.2.1] - 2026-01-26
 
 ### Fixed

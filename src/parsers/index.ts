@@ -7,12 +7,16 @@ export { gitignoreParser, dockerignoreParser, createIgnoreParser } from './gitig
 
 // JavaScript/TypeScript
 export { eslintIgnoreParser } from './eslint.js';
+export { eslintFlatParser } from './eslint-flat.js';
 export { prettierIgnoreParser } from './prettier.js';
 export { tsconfigParser } from './typescript.js';
 export { jestConfigParser } from './jest.js';
 export { stylelintIgnoreParser, stylelintRcParser } from './stylelint.js';
 export { biomeParser } from './biome.js';
 export { denoParser } from './deno.js';
+export { oxlintParser } from './oxlint.js';
+export { commitlintParser } from './commitlint.js';
+export { lintStagedParser } from './lint-staged.js';
 
 // Python
 export { pyprojectParser } from './pyproject.js';
@@ -73,17 +77,37 @@ export { gitleaksParser } from './gitleaks.js';
 // Docker
 export { hadolintParser } from './hadolint.js';
 
+// Git Hooks
+export { lefthookParser } from './lefthook.js';
+export { preCommitParser } from './pre-commit.js';
+
+// DevOps
+export { ansibleLintParser } from './ansible-lint.js';
+
+// SQL
+export { sqlfluffParser, sqlfluffSetupCfgParser } from './sqlfluff.js';
+
+// Protocol Buffers
+export { bufParser } from './buf.js';
+
+// Documentation
+export { alexIgnoreParser, alexRcParser } from './alex.js';
+
 import type { Parser } from '../plugin/types.js';
 
 // Import all parsers for getBuiltinParsers
 import { gitignoreParser, dockerignoreParser } from './gitignore.js';
 import { eslintIgnoreParser } from './eslint.js';
+import { eslintFlatParser } from './eslint-flat.js';
 import { prettierIgnoreParser } from './prettier.js';
 import { tsconfigParser } from './typescript.js';
 import { jestConfigParser } from './jest.js';
 import { stylelintIgnoreParser, stylelintRcParser } from './stylelint.js';
 import { biomeParser } from './biome.js';
 import { denoParser } from './deno.js';
+import { oxlintParser } from './oxlint.js';
+import { commitlintParser } from './commitlint.js';
+import { lintStagedParser } from './lint-staged.js';
 import { pyprojectParser } from './pyproject.js';
 import { flake8Parser, flake8SetupCfgParser } from './flake8.js';
 import { pylintrcParser } from './pylint.js';
@@ -107,6 +131,12 @@ import { tflintParser } from './tflint.js';
 import { semgrepYmlParser, semgrepIgnoreParser } from './semgrep.js';
 import { gitleaksParser } from './gitleaks.js';
 import { hadolintParser } from './hadolint.js';
+import { lefthookParser } from './lefthook.js';
+import { preCommitParser } from './pre-commit.js';
+import { ansibleLintParser } from './ansible-lint.js';
+import { sqlfluffParser, sqlfluffSetupCfgParser } from './sqlfluff.js';
+import { bufParser } from './buf.js';
+import { alexIgnoreParser, alexRcParser } from './alex.js';
 
 /** Get all built-in parsers */
 export function getBuiltinParsers(): Parser[] {
@@ -117,6 +147,7 @@ export function getBuiltinParsers(): Parser[] {
 
     // JavaScript/TypeScript
     eslintIgnoreParser,
+    eslintFlatParser,
     prettierIgnoreParser,
     tsconfigParser,
     jestConfigParser,
@@ -124,6 +155,9 @@ export function getBuiltinParsers(): Parser[] {
     stylelintRcParser,
     biomeParser,
     denoParser,
+    oxlintParser,
+    commitlintParser,
+    lintStagedParser,
 
     // Python
     pyprojectParser,
@@ -191,6 +225,24 @@ export function getBuiltinParsers(): Parser[] {
     gitleaksParser,
 
     // Docker
-    hadolintParser
+    hadolintParser,
+
+    // Git Hooks
+    lefthookParser,
+    preCommitParser,
+
+    // DevOps
+    ansibleLintParser,
+
+    // SQL
+    sqlfluffParser,
+    sqlfluffSetupCfgParser,
+
+    // Protocol Buffers
+    bufParser,
+
+    // Documentation
+    alexIgnoreParser,
+    alexRcParser
   ];
 }

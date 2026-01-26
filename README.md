@@ -115,22 +115,27 @@ npx lostconf --exclude "**/test/**" --exclude "**/tests/**"
 
 ## Supported Config Files
 
-lostconf supports **48+ configuration files** from popular tools across **15+ languages**:
+lostconf supports **58+ configuration files** from popular tools across **15+ languages**:
 
 | Language/Category | Tool | Config File(s) | What We Check |
 |-------------------|------|----------------|---------------|
 | **JavaScript/TypeScript** | ESLint | `.eslintignore` | File paths and glob patterns in ignore list |
+| | ESLint Flat Config | `eslint.config.json` | Patterns in `ignores` and `files` arrays (JSON only) |
 | | Prettier | `.prettierignore` | File paths and glob patterns in ignore list |
 | | TypeScript | `tsconfig.json` | Files in `exclude`, `include` arrays |
 | | Jest | `jest.config.json` | Test paths, coverage paths, module paths |
 | | Stylelint | `.stylelintignore`, `.stylelintrc.json` | File paths and glob patterns, ignore patterns in config |
 | | Biome | `biome.json`, `biome.jsonc` | Patterns in `files.ignore`, `linter.ignore`, `formatter.ignore` |
 | | Deno | `deno.json`, `deno.jsonc` | Global `exclude`, `lint.exclude/include`, `fmt.exclude/include`, `test.exclude/include` |
+| | Oxlint | `.oxlintrc.json`, `oxlint.config.json` | Patterns in `ignorePatterns` array |
+| | commitlint | `.commitlintrc`, `.commitlintrc.json` | Commit message patterns in `ignores`, file paths in `extends` |
+| | lint-staged | `.lintstagedrc`, `.lintstagedrc.json` | Object keys are glob patterns matching staged files |
 | **Python** | pytest, coverage, mypy, ruff, black, isort | `pyproject.toml` | Test paths, source paths, exclude patterns, omit patterns |
 | | Flake8 | `.flake8`, `setup.cfg` | Exclude patterns, extend-exclude, filename patterns, per-file-ignores |
 | | Pylint | `.pylintrc`, `pylintrc` | Ignore paths, ignore patterns in `[MASTER]`/`[MAIN]` section |
 | | Bandit | `.bandit` | Exclude directories, exclude files, test paths |
 | | Pyright | `pyrightconfig.json` | `include`, `exclude`, `ignore`, `extraPaths` patterns |
+| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Exclude patterns, ignore patterns, template paths |
 | **Ruby** | RuboCop | `.rubocop.yml` | Exclude patterns, Include patterns in AllCops |
 | **Go** | golangci-lint | `.golangci.yml` | Skip-dirs, skip-files, exclude patterns |
 | **Rust** | rustfmt | `rustfmt.toml` | Ignore patterns |
@@ -155,9 +160,14 @@ lostconf supports **48+ configuration files** from popular tools across **15+ la
 | **Security** | Semgrep | `.semgrep.yml`, `.semgrep.yaml`, `.semgrepignore` | `paths.exclude`, `paths.include` in rules, ignore patterns |
 | | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, `allowlist.regexes`, rule-specific allowlists |
 | **Docker** | Hadolint | `.hadolint.yaml`, `.hadolint.yml` | `ignored` patterns, `trustedRegistries` (non-URL paths) |
+| **DevOps** | ansible-lint | `.ansible-lint`, `.ansible-lint.yaml` | Patterns in `exclude_paths` list |
+| **Protocol Buffers** | buf | `buf.yaml`, `buf.work.yaml` | Patterns in `lint.ignore`, `breaking.ignore`, workspace `directories` |
+| **Git Hooks** | lefthook | `lefthook.yml`, `.lefthook.yml` | Patterns in `files`, `glob`, `exclude`, `skip` fields |
+| | pre-commit | `.pre-commit-config.yaml` | Regex patterns in top-level and hook-level `files` and `exclude` |
 | **General** | Git | `.gitignore` | All file paths and patterns |
 | | Docker | `.dockerignore` | All file paths and patterns |
 | | markdownlint | `.markdownlintignore` | All file paths and patterns |
+| **Documentation** | alex | `.alexignore`, `.alexrc`, `.alexrc.json` | Ignore patterns and allowed terms |
 
 ## What Does lostconf Validate?
 

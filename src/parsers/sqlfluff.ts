@@ -1,0 +1,109 @@
+/**
+ * Parser for sqlfluff configuration files
+ * https://docs.sqlfluff.com/
+ */
+
+import type { Pattern } from '../core/types.js';
+import { PatternType } from '../core/types.js';
+import type { Parser } from '../plugin/types.js';
+import { isGlobPattern } from '../validator/glob.js';
+
+/** Parse .sqlfluff or setup.cfg file */
+function parseSqlfluff(filename: string, content: string): Pattern[] {
+  const patterns: Pattern[] = [];
+  const lines = content.split('\n');
+
+  let inSqlfluffSection = false;
+  let currentKey = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNum = i + 1;
+    const trimmed = line.trim();
+
+    // Check for [sqlfluff] or [sqlfluff:*] sections
+    if (trimmed === '[sqlfluff]' || trimmed.startsWith('[sqlfluff:')) {
+      inSqlfluffSection = true;
+      continue;
+    }
+
+    // Check if we've entered a different section
+    if (trimmed.startsWith('[') && trimmed.endsWith(']') && !trimmed.startsWith('[sqlfluff')) {
+      inSqlfluffSection = false;
+      continue;
+    }
+
+    if (!inSqlfluffSection) continue;
+
+    // Skip empty lines and comments
+    if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith(';')) {
+      continue;
+    }
+
+    // Parse key = value
+    if (trimmed.includes('=')) {
+      const [key, value] = trimmed.split('=').map((s) => s.trim());
+      currentKey = key;
+
+      // Check if this is a path-related field
+      if (isPathField(key) && value) {
+        extractPatterns(value, lineNum, patterns);
+      }
+    } else if (currentKey && isPathField(currentKey)) {
+      // Continuation line
+      extractPatterns(trimmed, lineNum, patterns);
+    }
+  }
+
+  return patterns;
+}
+
+/** Check if a key is a path-related field */
+function isPathField(key: string): boolean {
+  return [
+    'exclude_rules',
+    'ignore',
+    'ignore_templated_areas',
+    'template_path',
+    'library_path',
+    'sql_file_exts'
+  ].includes(key);
+}
+
+/** Extract patterns from a value string */
+function extractPatterns(value: string, line: number, patterns: Pattern[]): void {
+  // Split by comma or newline
+  const parts = value
+    .split(/[,\n]/)
+    .map((s) => s.trim())
+    .filter((s) => s && !s.startsWith('#') && !s.startsWith(';'));
+
+  for (const part of parts) {
+    // Skip empty parts
+    if (!part) continue;
+
+    // Determine type
+    const type = isGlobPattern(part) ? PatternType.GLOB : PatternType.PATH;
+
+    patterns.push({
+      value: part,
+      type,
+      line,
+      column: 1
+    });
+  }
+}
+
+/** sqlfluff .sqlfluff file parser */
+export const sqlfluffParser: Parser = {
+  name: 'sqlfluff',
+  filePatterns: ['.sqlfluff', '**/.sqlfluff'],
+  parse: parseSqlfluff
+};
+
+/** sqlfluff setup.cfg parser */
+export const sqlfluffSetupCfgParser: Parser = {
+  name: 'sqlfluff-setup',
+  filePatterns: ['setup.cfg', '**/setup.cfg'],
+  parse: parseSqlfluff
+};
