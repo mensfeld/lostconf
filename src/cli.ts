@@ -19,7 +19,7 @@ const program = new Command();
 program
   .name('lostconf')
   .description('A meta-linter that detects stale references in configuration files')
-  .version('0.1.0')
+  .version('0.3.0')
   .argument('[paths...]', 'Paths to scan (default: current directory)')
   .option('-f, --format <fmt>', 'Output format: text, json, sarif', 'text')
   .option('-o, --output <file>', 'Write to file instead of stdout')

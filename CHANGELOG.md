@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-26
+
 ### Added
 - Support for 10 new popular linters and configuration tools:
   - **ESLint Flat Config** (`eslint.config.json`) - New ESLint v9+ flat configuration format (JSON only)
@@ -29,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Updated README with new linter documentation and usage examples
+
+### Fixed
+- Alex parser no longer attempts to validate linguistic terms as file paths
+- SQLFluff parser now correctly identifies path-related fields (excludes rule IDs and file extensions)
+- Commitlint parser logic improved to properly filter npm packages vs. local file paths
+- Unused parameter warnings fixed in buf and sqlfluff parsers
 
 ## [0.2.1] - 2026-01-26
 
@@ -106,7 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Examples for CI/CD integration
 - Contributing guidelines
 
-[Unreleased]: https://github.com/mensfeld/lostconf/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/mensfeld/lostconf/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/mensfeld/lostconf/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/mensfeld/lostconf/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/mensfeld/lostconf/releases/tag/v0.2.0
+[0.2.0]: https://github.com/mensfeld/lostconf/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mensfeld/lostconf/releases/tag/v0.1.0

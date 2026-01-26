@@ -1,6 +1,6 @@
 {
   "name": "lostconf",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A meta-linter that detects stale references in configuration files",
   "type": "module",
   "main": "dist/index.js",

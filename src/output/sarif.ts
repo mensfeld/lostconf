@@ -113,7 +113,7 @@ export const sarifFormatter: Formatter = {
           tool: {
             driver: {
               name: 'lostconf',
-              version: '0.1.0',
+              version: '0.3.0',
               informationUri: 'https://github.com/lostconf/lostconf',
               rules: getRules(result.findings)
             }
