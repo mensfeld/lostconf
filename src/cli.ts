@@ -110,9 +110,14 @@ async function run(paths: string[], options: CliOptions): Promise<void> {
   let parsers = getBuiltinParsers();
 
   // Filter parsers based on options
-  const ignoreParserNames = ['gitignore', 'dockerignore', 'prettierignore', 'eslintignore'];
+  // If skipIgnoreFiles is enabled, find all parsers whose names end with 'ignore'
+  // Note: This filters parser names (e.g., 'gitignore', 'stylelintignore'), not file paths.
+  // Parser names are defined in code, so a directory named 'superignore' won't be affected.
+  const ignoreParserNames = skipIgnoreFiles
+    ? parsers.filter((p) => p.name.endsWith('ignore')).map((p) => p.name)
+    : [];
   const excludeParserSet = new Set([
-    ...(skipIgnoreFiles ? ignoreParserNames : []),
+    ...ignoreParserNames,
     ...excludeParsers
   ]);
 

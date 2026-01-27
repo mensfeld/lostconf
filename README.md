@@ -77,7 +77,7 @@ npx lostconf --include "**/tsconfig.json"
 
 ### Filtering Options
 
-- `--skip-ignore-files` - Skip .gitignore, .prettierignore, .eslintignore, and .dockerignore files. Reduces noise by 70-80% since these files contain many intentionally missing patterns.
+- `--skip-ignore-files` - Skip all ignore files (.gitignore, .prettierignore, .eslintignore, .dockerignore, .stylelintignore, etc.). Reduces noise by 70-80% since these files contain many intentionally missing patterns.
 - `--exclude-parsers <names...>` - Skip specific parsers by name (e.g., `--exclude-parsers gitignore prettierignore`)
 - `--include <glob...>` - Only check config files matching these glob patterns (e.g., `--include "**/tsconfig.json"`)
 - `--exclude <glob...>` - Skip config files matching these glob patterns (e.g., `--exclude "**/test/**"`)

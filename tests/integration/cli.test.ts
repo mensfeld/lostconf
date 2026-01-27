@@ -178,4 +178,41 @@ describe('CLI Integration Tests', () => {
     expect(stderr).toContain('[lostconf]');
     expect(stderr).toContain('Discovering config files');
   });
+
+  it('should skip ignore files with --skip-ignore-files', async () => {
+    await fs.writeFile(path.join(testDir, '.gitignore'), 'stale-git');
+    await fs.writeFile(path.join(testDir, '.prettierignore'), 'stale-prettier');
+    await fs.writeFile(path.join(testDir, '.eslintignore'), 'stale-eslint');
+    await fs.writeFile(path.join(testDir, '.stylelintignore'), 'stale-stylelint');
+    await fs.writeFile(path.join(testDir, '.dockerignore'), 'stale-docker');
+    await fs.writeFile(path.join(testDir, 'tsconfig.json'), '{"exclude": ["stale-ts"]}');
+
+    const { stdout } = await execAsync(
+      `node ${cliPath} ${testDir} --format json --skip-ignore-files --show-all`
+    );
+
+    const result = JSON.parse(stdout);
+    // Should only find the tsconfig.json stale pattern, not the ignore files
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].pattern).toBe('stale-ts');
+  });
+
+  it('should skip stylelintignore specifically with --skip-ignore-files', async () => {
+    await fs.writeFile(path.join(testDir, '.stylelintignore'), 'stale-stylelint-pattern');
+
+    // Without --skip-ignore-files, should find the stale pattern
+    const { stdout: withoutSkip } = await execAsync(
+      `node ${cliPath} ${testDir} --format json --show-all`
+    );
+    const resultWithout = JSON.parse(withoutSkip);
+    expect(resultWithout.findings.length).toBeGreaterThan(0);
+    expect(resultWithout.findings[0].pattern).toBe('stale-stylelint-pattern');
+
+    // With --skip-ignore-files, should skip .stylelintignore
+    const { stdout: withSkip } = await execAsync(
+      `node ${cliPath} ${testDir} --format json --skip-ignore-files --show-all`
+    );
+    const resultWith = JSON.parse(withSkip);
+    expect(resultWith.findings).toHaveLength(0);
+  });
 });
