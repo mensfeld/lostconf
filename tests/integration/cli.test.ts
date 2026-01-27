@@ -38,7 +38,7 @@ describe('CLI Integration Tests', () => {
   it('should show version with --version', async () => {
     const { stdout } = await execAsync(`node ${cliPath} --version`);
 
-    expect(stdout).toContain('0.3.0');
+    expect(stdout).toContain('0.4.0');
   });
 
   it('should output text format by default', async () => {
