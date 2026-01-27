@@ -116,10 +116,7 @@ async function run(paths: string[], options: CliOptions): Promise<void> {
   const ignoreParserNames = skipIgnoreFiles
     ? parsers.filter((p) => p.name.endsWith('ignore')).map((p) => p.name)
     : [];
-  const excludeParserSet = new Set([
-    ...ignoreParserNames,
-    ...excludeParsers
-  ]);
+  const excludeParserSet = new Set([...ignoreParserNames, ...excludeParsers]);
 
   if (excludeParserSet.size > 0) {
     parsers = parsers.filter((p) => !excludeParserSet.has(p.name));
