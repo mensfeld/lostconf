@@ -115,7 +115,7 @@ npx lostconf --exclude "**/test/**" --exclude "**/tests/**"
 
 ## Supported Config Files
 
-lostconf supports **62+ configuration files** from popular tools across **15+ languages**:
+lostconf supports **67+ configuration files** from popular tools across **15+ languages**:
 
 | Language/Category | Tool | Config File(s) | What We Check |
 |-------------------|------|----------------|---------------|
@@ -171,6 +171,11 @@ lostconf supports **62+ configuration files** from popular tools across **15+ la
 | **General** | Git | `.gitignore` | All file paths and patterns |
 | | Docker | `.dockerignore` | All file paths and patterns |
 | | markdownlint | `.markdownlintignore` | All file paths and patterns |
+| | remark | `.remarkignore` | All file paths and patterns |
+| | lychee | `.lycheeignore` | All file paths and patterns |
+| | secretlint | `.secretlintignore` | All file paths and patterns |
+| | VS Code | `.vscodeignore` | All file paths and patterns |
+| | git-leaks | `.ignoresecrets` | All file paths and patterns |
 | **Documentation** | alex | `.alexignore`, `.alexrc`, `.alexrc.json` | Ignore patterns and allowed terms |
 
 ## What Does lostconf Validate?

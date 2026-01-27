@@ -3,7 +3,16 @@
  */
 
 // General
-export { gitignoreParser, dockerignoreParser, createIgnoreParser } from './gitignore.js';
+export {
+  gitignoreParser,
+  dockerignoreParser,
+  remarkignoreParser,
+  lycheeignoreParser,
+  secretlintignoreParser,
+  vscodeignoreParser,
+  ignoresecretsParser,
+  createIgnoreParser
+} from './gitignore.js';
 
 // JavaScript/TypeScript
 export { eslintIgnoreParser } from './eslint.js';
@@ -100,7 +109,15 @@ export { alexIgnoreParser, alexRcParser } from './alex.js';
 import type { Parser } from '../plugin/types.js';
 
 // Import all parsers for getBuiltinParsers
-import { gitignoreParser, dockerignoreParser } from './gitignore.js';
+import {
+  gitignoreParser,
+  dockerignoreParser,
+  remarkignoreParser,
+  lycheeignoreParser,
+  secretlintignoreParser,
+  vscodeignoreParser,
+  ignoresecretsParser
+} from './gitignore.js';
 import { eslintIgnoreParser } from './eslint.js';
 import { eslintFlatParser } from './eslint-flat.js';
 import { prettierIgnoreParser } from './prettier.js';
@@ -152,6 +169,11 @@ export function getBuiltinParsers(): Parser[] {
     // General
     gitignoreParser,
     dockerignoreParser,
+    remarkignoreParser,
+    lycheeignoreParser,
+    secretlintignoreParser,
+    vscodeignoreParser,
+    ignoresecretsParser,
 
     // JavaScript/TypeScript
     eslintIgnoreParser,

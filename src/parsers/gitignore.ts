@@ -78,6 +78,41 @@ export const dockerignoreParser: Parser = {
   parse: parseIgnoreFile
 };
 
+/** Remarkignore parser (remark markdown processor) */
+export const remarkignoreParser: Parser = {
+  name: 'remarkignore',
+  filePatterns: ['.remarkignore', '**/.remarkignore'],
+  parse: parseIgnoreFile
+};
+
+/** Lycheeignore parser (lychee link checker) */
+export const lycheeignoreParser: Parser = {
+  name: 'lycheeignore',
+  filePatterns: ['.lycheeignore', '**/.lycheeignore'],
+  parse: parseIgnoreFile
+};
+
+/** Secretlintignore parser (secretlint) */
+export const secretlintignoreParser: Parser = {
+  name: 'secretlintignore',
+  filePatterns: ['.secretlintignore', '**/.secretlintignore'],
+  parse: parseIgnoreFile
+};
+
+/** Vscodeignore parser (VS Code extensions) */
+export const vscodeignoreParser: Parser = {
+  name: 'vscodeignore',
+  filePatterns: ['.vscodeignore', '**/.vscodeignore'],
+  parse: parseIgnoreFile
+};
+
+/** Ignoresecrets parser (git-leaks) */
+export const ignoresecretsParser: Parser = {
+  name: 'ignoresecrets',
+  filePatterns: ['.ignoresecrets', '**/.ignoresecrets'],
+  parse: parseIgnoreFile
+};
+
 /** Generic ignore file parser factory */
 export function createIgnoreParser(name: string, filePatterns: string[]): Parser {
   return {

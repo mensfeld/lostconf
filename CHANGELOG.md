@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Support for 5 new ignore file parsers (Issue #5):
+  - **remark** (`.remarkignore`) - Markdown processor ignore file
+  - **lychee** (`.lycheeignore`) - Link checker ignore file
+  - **secretlint** (`.secretlintignore`) - Secret detection ignore file
+  - **VS Code** (`.vscodeignore`) - VS Code extension ignore file
+  - **git-leaks** (`.ignoresecrets`) - Gitleaks alternative ignore file
+- Total supported configuration files increased from 62+ to 67+
+
+### Fixed
+- `--skip-ignore-files` now properly skips `.stylelintignore` files (Issue #5)
+- `--skip-ignore-files` now dynamically skips all ignore file parsers (names ending with 'ignore')
+- Future-proof: new ignore file parsers are automatically skipped when using `--skip-ignore-files`
+
 ## [0.3.0] - 2026-01-26
 
 ### Added

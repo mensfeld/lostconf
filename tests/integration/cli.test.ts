@@ -185,6 +185,11 @@ describe('CLI Integration Tests', () => {
     await fs.writeFile(path.join(testDir, '.eslintignore'), 'stale-eslint');
     await fs.writeFile(path.join(testDir, '.stylelintignore'), 'stale-stylelint');
     await fs.writeFile(path.join(testDir, '.dockerignore'), 'stale-docker');
+    await fs.writeFile(path.join(testDir, '.remarkignore'), 'stale-remark');
+    await fs.writeFile(path.join(testDir, '.lycheeignore'), 'stale-lychee');
+    await fs.writeFile(path.join(testDir, '.secretlintignore'), 'stale-secretlint');
+    await fs.writeFile(path.join(testDir, '.vscodeignore'), 'stale-vscode');
+    await fs.writeFile(path.join(testDir, '.ignoresecrets'), 'stale-ignoresecrets');
     await fs.writeFile(path.join(testDir, 'tsconfig.json'), '{"exclude": ["stale-ts"]}');
 
     const { stdout } = await execAsync(

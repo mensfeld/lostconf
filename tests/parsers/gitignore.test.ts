@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { gitignoreParser } from '../../src/parsers/gitignore.js';
+import {
+  gitignoreParser,
+  remarkignoreParser,
+  lycheeignoreParser,
+  secretlintignoreParser,
+  vscodeignoreParser,
+  ignoresecretsParser
+} from '../../src/parsers/gitignore.js';
 import { PatternType } from '../../src/core/types.js';
 
 describe('gitignoreParser', () => {
@@ -78,5 +85,49 @@ dist
     expect(patterns[0].line).toBe(2);
     expect(patterns[1].line).toBe(3);
     expect(patterns[2].line).toBe(4);
+  });
+});
+
+describe('New ignore file parsers', () => {
+  const testContent = `
+# Test comment
+*.log
+node_modules
+`;
+
+  it('remarkignoreParser should parse correctly', () => {
+    expect(remarkignoreParser.name).toBe('remarkignore');
+    expect(remarkignoreParser.filePatterns).toContain('.remarkignore');
+    const patterns = remarkignoreParser.parse('.remarkignore', testContent);
+    expect(patterns).toHaveLength(2);
+    expect(patterns[0].value).toBe('*.log');
+  });
+
+  it('lycheeignoreParser should parse correctly', () => {
+    expect(lycheeignoreParser.name).toBe('lycheeignore');
+    expect(lycheeignoreParser.filePatterns).toContain('.lycheeignore');
+    const patterns = lycheeignoreParser.parse('.lycheeignore', testContent);
+    expect(patterns).toHaveLength(2);
+  });
+
+  it('secretlintignoreParser should parse correctly', () => {
+    expect(secretlintignoreParser.name).toBe('secretlintignore');
+    expect(secretlintignoreParser.filePatterns).toContain('.secretlintignore');
+    const patterns = secretlintignoreParser.parse('.secretlintignore', testContent);
+    expect(patterns).toHaveLength(2);
+  });
+
+  it('vscodeignoreParser should parse correctly', () => {
+    expect(vscodeignoreParser.name).toBe('vscodeignore');
+    expect(vscodeignoreParser.filePatterns).toContain('.vscodeignore');
+    const patterns = vscodeignoreParser.parse('.vscodeignore', testContent);
+    expect(patterns).toHaveLength(2);
+  });
+
+  it('ignoresecretsParser should parse correctly', () => {
+    expect(ignoresecretsParser.name).toBe('ignoresecrets');
+    expect(ignoresecretsParser.filePatterns).toContain('.ignoresecrets');
+    const patterns = ignoresecretsParser.parse('.ignoresecrets', testContent);
+    expect(patterns).toHaveLength(2);
   });
 });
