@@ -2,8 +2,16 @@
  * Text output formatter
  */
 
-import chalk from 'chalk';
 import type { ValidationResult, Finding, StaleReason } from '../core/types.js';
+
+/** Inline ANSI color helpers (replaces chalk) */
+const ansi = (code: number, close: number) => (s: string) => `\x1b[${code}m${s}\x1b[${close}m`;
+const gray = ansi(90, 39);
+const yellow = ansi(33, 39);
+const red = ansi(31, 39);
+const cyan = ansi(36, 39);
+const dim = ansi(2, 22);
+const green = ansi(32, 39);
 import { Severity } from '../core/types.js';
 import type { Formatter } from './formatter.js';
 
@@ -23,20 +31,20 @@ function formatReason(reason: StaleReason): string {
 function getSeverityIcon(severity: Severity): string {
   switch (severity) {
     case Severity.LOW:
-      return chalk.gray('○');
+      return gray('○');
     case Severity.MEDIUM:
-      return chalk.yellow('●');
+      return yellow('●');
     case Severity.HIGH:
-      return chalk.red('●');
+      return red('●');
   }
 }
 
 /** Format a single finding */
 function formatFinding(finding: Finding): string {
   const severityIcon = getSeverityIcon(finding.severity);
-  const location = chalk.cyan(`${finding.file}:${finding.line}`);
-  const pattern = chalk.yellow(finding.pattern);
-  const reason = chalk.dim(formatReason(finding.reason));
+  const location = cyan(`${finding.file}:${finding.line}`);
+  const pattern = yellow(finding.pattern);
+  const reason = dim(formatReason(finding.reason));
 
   // Calculate padding for alignment
   const locationStr = `${finding.file}:${finding.line}`;
@@ -51,7 +59,7 @@ export const textFormatter: Formatter = {
     const lines: string[] = [];
 
     if (result.findings.length === 0) {
-      lines.push(chalk.green('No stale patterns found'));
+      lines.push(green('No stale patterns found'));
       return lines.join('\n');
     }
 
@@ -84,13 +92,13 @@ export const textFormatter: Formatter = {
 
     const parts = [];
     if (severityCounts[Severity.HIGH] > 0) {
-      parts.push(chalk.red(`${severityCounts[Severity.HIGH]} high`));
+      parts.push(red(`${severityCounts[Severity.HIGH]} high`));
     }
     if (severityCounts[Severity.MEDIUM] > 0) {
-      parts.push(chalk.yellow(`${severityCounts[Severity.MEDIUM]} medium`));
+      parts.push(yellow(`${severityCounts[Severity.MEDIUM]} medium`));
     }
     if (severityCounts[Severity.LOW] > 0) {
-      parts.push(chalk.gray(`${severityCounts[Severity.LOW]} low`));
+      parts.push(gray(`${severityCounts[Severity.LOW]} low`));
     }
 
     lines.push(
