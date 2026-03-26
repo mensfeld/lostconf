@@ -1,8 +1,8 @@
 /**
- * Glob matching utilities using micromatch
+ * Glob matching utilities using picomatch
  */
 
-import micromatch from 'micromatch';
+import picomatch from 'picomatch';
 
 export interface GlobMatchOptions {
   /** Base directory for relative patterns */
@@ -33,10 +33,11 @@ export function globMatches(
   }
 
   try {
-    return micromatch(files, normalizedPattern, {
+    const isMatch = picomatch(normalizedPattern, {
       dot,
       matchBase: !normalizedPattern.includes('/')
     });
+    return files.filter((file) => isMatch(file));
   } catch {
     // Invalid pattern
     return [];
@@ -47,7 +48,7 @@ export function globMatches(
 export function isValidGlob(pattern: string): boolean {
   try {
     // Try to compile the pattern
-    micromatch.makeRe(pattern);
+    picomatch.makeRe(pattern);
     return true;
   } catch {
     return false;

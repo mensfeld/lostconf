@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-03-26
+
+### Changed
+- Replaced `chalk` dependency with inline ANSI color helpers (zero-dependency text coloring)
+- Replaced `commander` dependency with Node.js built-in `node:util parseArgs` (stable since Node 18.3)
+- Replaced `micromatch` dependency with `picomatch` (already a transitive dependency via `fast-glob`)
+- Reduced runtime dependencies from 6 to 4: `fast-glob`, `picomatch`, `smol-toml`, `yaml`
+
 ## [0.4.0] - 2026-01-27
 
 ### Added
@@ -130,7 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Examples for CI/CD integration
 - Contributing guidelines
 
-[Unreleased]: https://github.com/mensfeld/lostconf/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/mensfeld/lostconf/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/mensfeld/lostconf/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/mensfeld/lostconf/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mensfeld/lostconf/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/mensfeld/lostconf/compare/v0.2.0...v0.2.1
