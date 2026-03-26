@@ -35,7 +35,7 @@ export function globMatches(
   try {
     const isMatch = picomatch(normalizedPattern, {
       dot,
-      basename: !normalizedPattern.includes('/')
+      matchBase: !normalizedPattern.includes('/')
     });
     return files.filter((file) => isMatch(file));
   } catch {

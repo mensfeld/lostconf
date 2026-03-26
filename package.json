@@ -52,7 +52,7 @@
   "author": "Maciej Mensfeld <maciej@mensfeld.pl>",
   "license": "MIT",
   "engines": {
-    "node": ">=18.3.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "fast-glob": "^3.3.2",
