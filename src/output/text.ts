@@ -5,7 +5,11 @@
 import type { ValidationResult, Finding, StaleReason } from '../core/types.js';
 
 /** Inline ANSI color helpers (replaces chalk) */
-const ansi = (code: number, close: number) => (s: string) => `\x1b[${code}m${s}\x1b[${close}m`;
+const colorEnabled =
+  !('NO_COLOR' in process.env) &&
+  (process.stdout.isTTY === true || process.env.FORCE_COLOR !== undefined);
+const ansi = (code: number, close: number) =>
+  colorEnabled ? (s: string) => `\x1b[${code}m${s}\x1b[${close}m` : (s: string) => s;
 const gray = ansi(90, 39);
 const yellow = ansi(33, 39);
 const red = ansi(31, 39);
