@@ -41,23 +41,19 @@ const DEFAULT_IGNORE = [
   '**/vendor/**'
 ];
 
-/** Scan a directory and build a file tree */
-export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
-  const { paths, ignore = [], followSymlinks = false } = options;
-  const basePath = paths.length === 1 ? path.resolve(paths[0]) : process.cwd();
+/** Files and directory symlinks among fast-glob entries */
+export interface ClassifiedEntries {
+  /** Regular files and symlinks to anything but a directory */
+  files: string[];
+  /** Symlinks to directories */
+  directorySymlinks: Set<string>;
+}
 
-  const allIgnore = [...DEFAULT_IGNORE, ...ignore];
-
-  // Scan for all entries; symlinks are listed but not followed unless requested
-  const entries = await fg('**/*', {
-    cwd: basePath,
-    dot: true,
-    onlyFiles: false,
-    objectMode: true,
-    ignore: allIgnore,
-    followSymbolicLinks: followSymlinks
-  });
-
+/** Split fast-glob object-mode entries into files and directory symlinks */
+export async function classifyEntries(
+  basePath: string,
+  entries: fg.Entry[]
+): Promise<ClassifiedEntries> {
   const files: string[] = [];
   const directorySymlinks = new Set<string>();
   const symlinks: string[] = [];
@@ -81,6 +77,28 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
       files.push(link);
     }
   });
+
+  return { files, directorySymlinks };
+}
+
+/** Scan a directory and build a file tree */
+export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
+  const { paths, ignore = [], followSymlinks = false } = options;
+  const basePath = paths.length === 1 ? path.resolve(paths[0]) : process.cwd();
+
+  const allIgnore = [...DEFAULT_IGNORE, ...ignore];
+
+  // Scan for all entries; symlinks are listed but not followed unless requested
+  const entries = await fg('**/*', {
+    cwd: basePath,
+    dot: true,
+    onlyFiles: false,
+    objectMode: true,
+    ignore: allIgnore,
+    followSymbolicLinks: followSymlinks
+  });
+
+  const { files, directorySymlinks } = await classifyEntries(basePath, entries);
 
   // Build directory set from file paths
   const directories = new Set<string>();

@@ -3,9 +3,9 @@
  */
 
 import fg from 'fast-glob';
-import fs from 'fs';
 import path from 'path';
 import type { Parser } from '../plugin/types.js';
+import { classifyEntries } from '../filetree/scanner.js';
 
 export interface DiscoveryOptions {
   /** Directories to scan */
@@ -63,14 +63,7 @@ export async function discoverConfigs(
     ignore: [...defaultExclude, ...exclude]
   });
 
-  const files: string[] = [];
-  for (const entry of entries) {
-    if (entry.dirent.isFile()) {
-      files.push(entry.path);
-    } else if (entry.dirent.isSymbolicLink() && (await isFileTarget(basePath, entry.path))) {
-      files.push(entry.path);
-    }
-  }
+  const { files } = await classifyEntries(basePath, entries);
 
   // Match files to parsers
   const discovered: DiscoveredConfig[] = [];
@@ -89,15 +82,6 @@ export async function discoverConfigs(
   }
 
   return discovered;
-}
-
-/** Check if a symlink points to a file */
-async function isFileTarget(basePath: string, link: string): Promise<boolean> {
-  try {
-    return (await fs.promises.stat(path.join(basePath, link))).isFile();
-  } catch {
-    return false;
-  }
 }
 
 /** Check if a file matches a parser's patterns */
