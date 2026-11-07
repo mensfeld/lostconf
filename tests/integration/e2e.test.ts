@@ -28,6 +28,14 @@ describe('End-to-End Integration Tests', () => {
     await fs.rm(testDir, { recursive: true, force: true });
   });
 
+  const run = async () => {
+    const engine = createEngine(getBuiltinParsers(), {
+      paths: [testDir],
+      verbose: false
+    });
+    return engine.run();
+  };
+
   it('should detect stale patterns in .gitignore', async () => {
     // Create .gitignore with stale patterns
     await fs.writeFile(
@@ -244,14 +252,6 @@ src/**/*.tmp`
   });
 
   describe('ignore file syntax', () => {
-    const run = async () => {
-      const engine = createEngine(getBuiltinParsers(), {
-        paths: [testDir],
-        verbose: false
-      });
-      return engine.run();
-    };
-
     it('should resolve anchored, trailing-slash and escaped patterns', async () => {
       await fs.writeFile(path.join(testDir, 'CHANGELOG.md'), '');
       await fs.mkdir(path.join(testDir, 'docs'));
@@ -320,14 +320,6 @@ src/**/*.tmp`
   });
 
   describe('symlinks', () => {
-    const run = async () => {
-      const engine = createEngine(getBuiltinParsers(), {
-        paths: [testDir],
-        verbose: false
-      });
-      return engine.run();
-    };
-
     const configPaths = async () =>
       (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);
 

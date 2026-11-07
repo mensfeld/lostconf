@@ -131,7 +131,6 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
 export function pathExists(tree: FileTree, targetPath: string): boolean {
   const slashed = targetPath.replace(/\\/g, '/').replace(/^\.\//, '');
   const normalized = slashed.replace(/\/+$/, '');
-  // A trailing / matches a directory only
   const directoryOnly = normalized !== slashed;
   if ((!directoryOnly && tree.files.has(normalized)) || tree.directories.has(normalized)) {
     return true;
