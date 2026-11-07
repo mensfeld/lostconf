@@ -39,6 +39,17 @@ describe('validatePattern', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('should validate existing directory path with a trailing slash', () => {
+      const pattern: Pattern = {
+        value: 'src/utils/',
+        type: PatternType.PATH,
+        line: 1
+      };
+
+      const result = validatePattern(pattern, mockTree);
+      expect(result.valid).toBe(true);
+    });
+
     it('should invalidate non-existent path', () => {
       const pattern: Pattern = {
         value: 'src/missing.ts',

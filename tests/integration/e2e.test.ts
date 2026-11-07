@@ -243,6 +243,50 @@ src/**/*.tmp`
     expect(result.findings[0].pattern).toBe('**/*.spec.js');
   });
 
+  describe('ignore file syntax', () => {
+    const run = async () => {
+      const engine = createEngine(getBuiltinParsers(), {
+        paths: [testDir],
+        verbose: false
+      });
+      return engine.run();
+    };
+
+    it('should resolve anchored, trailing-slash and escaped patterns', async () => {
+      await fs.writeFile(path.join(testDir, 'CHANGELOG.md'), '');
+      await fs.mkdir(path.join(testDir, 'docs'));
+      await fs.writeFile(path.join(testDir, 'docs', 'a.md'), '');
+      await fs.writeFile(path.join(testDir, '#notes.md'), '');
+      await fs.writeFile(
+        path.join(testDir, '.remarkignore'),
+        '/CHANGELOG.md\ndocs/\n\\#notes.md\n'
+      );
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(0);
+    });
+
+    it('should anchor a leading / to the ignore file directory', async () => {
+      await fs.mkdir(path.join(testDir, 'sub'));
+      await fs.writeFile(path.join(testDir, 'sub', 'a.txt'), '');
+      await fs.writeFile(path.join(testDir, 'sub', '.gitignore'), '/a.txt\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(0);
+    });
+
+    it('should report a missing anchored pattern', async () => {
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '/missing.md\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].pattern).toBe('missing.md');
+    });
+  });
+
   describe('symlinks', () => {
     const run = async () => {
       const engine = createEngine(getBuiltinParsers(), {

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Symlinks no longer cause false stale findings: symlinks to files and directories count as present, paths through a directory symlink are checked against their target, and config discovery no longer follows directory symlinks (a symlink cycle no longer yields duplicate configs)
+- Paths with a trailing `/` (`docs/`, `./logs/`) now match existing directories
+- Ignore files (`.gitignore`, `.remarkignore`, ...): a leading `/` anchors the pattern to the ignore file's directory instead of the filesystem root, and the escapes `\#`, `\!` and a trailing `\ ` are unescaped; findings for anchored patterns now show the pattern without the leading `/`
 
 ## [0.4.1] - 2026-03-26
 

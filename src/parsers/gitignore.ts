@@ -23,15 +23,23 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
     }
 
     // Check for negation
-    let patternValue = trimmed;
+    let patternValue = line.trimStart();
     let negated = false;
     if (patternValue.startsWith('!')) {
       negated = true;
       patternValue = patternValue.slice(1);
     }
 
-    // Remove trailing spaces (unless escaped)
-    patternValue = patternValue.replace(/(?<!\\)\s+$/, '');
+    // Remove trailing spaces (unless escaped), then unescape an escaped one
+    patternValue = patternValue.replace(/(?<!\\)\s+$/, '').replace(/\\ $/, ' ');
+
+    // Unescape a leading # or !
+    patternValue = patternValue.replace(/^\\([#!])/, '$1');
+
+    // A leading / anchors the pattern to the ignore file's directory
+    if (patternValue.startsWith('/')) {
+      patternValue = patternValue.slice(1);
+    }
 
     // Skip empty patterns after processing
     if (!patternValue) {

@@ -129,7 +129,7 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
 
 /** Check if a path exists in the file tree */
 export function pathExists(tree: FileTree, targetPath: string): boolean {
-  const normalized = targetPath.replace(/\\/g, '/').replace(/^\.\//, '');
+  const normalized = targetPath.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
   if (tree.files.has(normalized) || tree.directories.has(normalized)) {
     return true;
   }
