@@ -8,6 +8,7 @@ import { PatternType } from '../core/types.js';
 import { pathExists } from '../filetree/tree.js';
 import type { FileTree } from '../filetree/tree.js';
 import { globMatches, isValidGlob } from './glob.js';
+import type { GlobMatchOptions } from './glob.js';
 import { regexMatches, isValidRegex } from './regex.js';
 import { classifySeverity } from '../core/severity.js';
 
@@ -41,7 +42,10 @@ export function validatePattern(
       return validatePathPattern(resolvedPattern, tree);
 
     case PatternType.GLOB:
-      return validateGlobPattern(resolvedPattern, files, pattern.anchored);
+      return validateGlobPattern(resolvedPattern, files, {
+        anchored: pattern.anchored,
+        literalBang: pattern.literalBang
+      });
 
     case PatternType.REGEX:
       return validateRegexPattern(resolvedPattern, files);
@@ -66,13 +70,13 @@ function validatePathPattern(
 function validateGlobPattern(
   patternValue: string,
   files: string[],
-  anchored = false
+  globOptions: GlobMatchOptions = {}
 ): { valid: boolean; reason?: StaleReason } {
   if (!isValidGlob(patternValue)) {
     return { valid: false, reason: 'invalid_pattern' };
   }
 
-  const matches = globMatches(patternValue, files, { anchored });
+  const matches = globMatches(patternValue, files, globOptions);
   if (matches.length > 0) {
     return { valid: true };
   }

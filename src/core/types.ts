@@ -36,6 +36,8 @@ export interface Pattern {
   negated?: boolean;
   /** Whether the pattern is anchored to the config directory (e.g., /pattern in an ignore file) */
   anchored?: boolean;
+  /** Whether a leading ! is a literal character, not a negation (e.g., \\!pattern in an ignore file) */
+  literalBang?: boolean;
   /** Base path for relative patterns */
   basePath?: string;
 }

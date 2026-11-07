@@ -11,6 +11,8 @@ export interface GlobMatchOptions {
   dot?: boolean;
   /** Match from the root only, never by basename */
   anchored?: boolean;
+  /** Treat a leading ! as a literal character, not a negation */
+  literalBang?: boolean;
 }
 
 /** Check if any files match a glob pattern */
@@ -19,7 +21,7 @@ export function globMatches(
   files: string[],
   options: GlobMatchOptions = {}
 ): string[] {
-  const { dot = true, anchored = false } = options;
+  const { dot = true, anchored = false, literalBang = false } = options;
 
   // Normalize pattern
   let normalizedPattern = pattern.replace(/\\/g, '/');
@@ -30,14 +32,15 @@ export function globMatches(
   }
 
   // Handle negated patterns (we check these as positive for matching)
-  if (normalizedPattern.startsWith('!')) {
+  if (!literalBang && normalizedPattern.startsWith('!')) {
     normalizedPattern = normalizedPattern.slice(1);
   }
 
   try {
     const isMatch = picomatch(normalizedPattern, {
       dot,
-      basename: !anchored && !normalizedPattern.includes('/')
+      basename: !anchored && !normalizedPattern.includes('/'),
+      nonegate: literalBang
     });
     return files.filter((file) => isMatch(file));
   } catch {

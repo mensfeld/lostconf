@@ -47,10 +47,11 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
       continue;
     }
 
-    // Determine pattern type; a leading ! left here was escaped and is literal
-    const type = determinePatternType(
-      patternValue.startsWith('!') ? patternValue.slice(1) : patternValue
-    );
+    // A leading ! left here was escaped and is literal
+    const literalBang = patternValue.startsWith('!');
+
+    // Determine pattern type
+    const type = determinePatternType(literalBang ? patternValue.slice(1) : patternValue);
 
     patterns.push({
       value: patternValue,
@@ -58,7 +59,8 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
       line: lineNum,
       column: 1,
       negated,
-      ...(anchored && { anchored })
+      ...(anchored && { anchored }),
+      ...(literalBang && { literalBang })
     });
   }
 

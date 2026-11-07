@@ -289,6 +289,17 @@ src/**/*.tmp`
       expect(result.findings[0].pattern).toBe('*.md');
     });
 
+    it('should match an escaped leading ! in a glob literally', async () => {
+      await fs.writeFile(path.join(testDir, 'x.md'), '');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '\\!*.md\n');
+
+      expect((await run()).findings).toHaveLength(1);
+
+      await fs.writeFile(path.join(testDir, '!a.md'), '');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
     it('should not match a file with a trailing slash pattern', async () => {
       await fs.writeFile(path.join(testDir, 'docs'), '');
       await fs.writeFile(path.join(testDir, '.remarkignore'), 'docs/\n');
