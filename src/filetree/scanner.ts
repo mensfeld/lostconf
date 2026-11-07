@@ -43,7 +43,7 @@ const DEFAULT_IGNORE = [
 
 /** Files and directory symlinks among fast-glob entries */
 export interface ClassifiedEntries {
-  /** Regular files and symlinks to anything but a directory */
+  /** Regular files and symlinks to regular files */
   files: string[];
   /** Symlinks to directories */
   directorySymlinks: Set<string>;
@@ -73,7 +73,7 @@ export async function classifyEntries(
     const target = targets[i];
     if (target?.isDirectory()) {
       directorySymlinks.add(link);
-    } else if (target) {
+    } else if (target?.isFile()) {
       files.push(link);
     }
   });

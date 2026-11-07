@@ -10,6 +10,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { execFileSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -332,6 +333,14 @@ src/**/*.tmp`
       expect(await configPaths()).toEqual(['.rubocop.yml']);
       const result = await run();
       expect(result.findings.map((f) => f.pattern)).toEqual(['missing.rb']);
+    });
+
+    it('should not discover a config symlink to a FIFO', async () => {
+      execFileSync('mkfifo', [path.join(testDir, 'pipe')]);
+      await fs.symlink('pipe', path.join(testDir, '.rubocop.yml'));
+
+      expect(await configPaths()).toEqual([]);
+      expect((await run()).findings).toHaveLength(0);
     });
   });
 });
