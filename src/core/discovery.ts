@@ -5,6 +5,7 @@
 import fg from 'fast-glob';
 import path from 'path';
 import type { Parser } from '../plugin/types.js';
+import { classifyEntries } from '../filetree/scanner.js';
 
 export interface DiscoveryOptions {
   /** Directories to scan */
@@ -51,13 +52,18 @@ export async function discoverConfigs(
   // Default excludes
   const defaultExclude = ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**'];
 
-  // Find all matching config files
-  const files = await fg(searchPatterns, {
+  // Find all matching config files; directory symlinks are not followed, so a
+  // config is found once, at its real path, and symlink cycles cannot loop
+  const entries = await fg(searchPatterns, {
     cwd: basePath,
     dot: true,
-    onlyFiles: true,
+    onlyFiles: false,
+    objectMode: true,
+    followSymbolicLinks: false,
     ignore: [...defaultExclude, ...exclude]
   });
+
+  const { files } = await classifyEntries(basePath, entries);
 
   // Match files to parsers
   const discovered: DiscoveredConfig[] = [];

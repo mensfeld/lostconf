@@ -4,11 +4,13 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createEngine } from '../../src/core/engine.js';
+import { discoverConfigs } from '../../src/core/discovery.js';
 import { getBuiltinParsers } from '../../src/parsers/index.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { execFileSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -239,5 +241,106 @@ src/**/*.tmp`
     // **/*.spec.js has no matches (stale)
     expect(result.findings).toHaveLength(1);
     expect(result.findings[0].pattern).toBe('**/*.spec.js');
+  });
+
+  describe('symlinks', () => {
+    const run = async () => {
+      const engine = createEngine(getBuiltinParsers(), {
+        paths: [testDir],
+        verbose: false
+      });
+      return engine.run();
+    };
+
+    const configPaths = async () =>
+      (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);
+
+    const writeRubocop = async (dir: string, excludes: string[]) => {
+      await fs.writeFile(
+        path.join(dir, '.rubocop.yml'),
+        `AllCops:\n  Exclude:\n${excludes.map((e) => `    - ${e}`).join('\n')}\n`
+      );
+    };
+
+    it('should treat a symlink to a file as present', async () => {
+      await fs.writeFile(path.join(testDir, 'real.rb'), '');
+      await fs.symlink('real.rb', path.join(testDir, 'link.rb'));
+      await writeRubocop(testDir, ['link.rb']);
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(0);
+    });
+
+    it('should treat a path through a directory symlink as present', async () => {
+      await fs.mkdir(path.join(testDir, 'real'));
+      await fs.writeFile(path.join(testDir, 'real', 'a.rb'), '');
+      await fs.symlink('real', path.join(testDir, 'linked'));
+      await writeRubocop(testDir, ['linked', 'linked/a.rb']);
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(0);
+    });
+
+    it('should report a path through a directory symlink whose target is missing', async () => {
+      await fs.mkdir(path.join(testDir, 'real'));
+      await fs.symlink('real', path.join(testDir, 'linked'));
+      await writeRubocop(testDir, ['linked/missing.rb']);
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].pattern).toBe('linked/missing.rb');
+    });
+
+    it('should report a dangling symlink as stale', async () => {
+      await fs.symlink('nothing.rb', path.join(testDir, 'gone.rb'));
+      await writeRubocop(testDir, ['gone.rb']);
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].pattern).toBe('gone.rb');
+    });
+
+    it('should find a config once when a directory symlink points to its directory', async () => {
+      await fs.mkdir(path.join(testDir, 'real'));
+      await fs.writeFile(path.join(testDir, 'real', 'a.rb'), '');
+      await writeRubocop(path.join(testDir, 'real'), ['a.rb']);
+      await fs.symlink('real', path.join(testDir, 'linked'));
+
+      expect(await configPaths()).toEqual(['real/.rubocop.yml']);
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should not loop on a symlink cycle', async () => {
+      await fs.mkdir(path.join(testDir, 'a'));
+      await fs.symlink('..', path.join(testDir, 'a', 'up'));
+      await fs.writeFile(path.join(testDir, 'real.rb'), '');
+      await writeRubocop(testDir, ['real.rb']);
+
+      expect(await configPaths()).toEqual(['.rubocop.yml']);
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should discover a config file that is a symlink to a file', async () => {
+      await fs.writeFile(path.join(testDir, 'real.rb'), '');
+      await writeRubocop(testDir, ['real.rb', 'missing.rb']);
+      await fs.rename(path.join(testDir, '.rubocop.yml'), path.join(testDir, 'shared.yml'));
+      await fs.symlink('shared.yml', path.join(testDir, '.rubocop.yml'));
+
+      expect(await configPaths()).toEqual(['.rubocop.yml']);
+      const result = await run();
+      expect(result.findings.map((f) => f.pattern)).toEqual(['missing.rb']);
+    });
+
+    it('should not discover a config symlink to a FIFO', async () => {
+      execFileSync('mkfifo', [path.join(testDir, 'pipe')]);
+      await fs.symlink('pipe', path.join(testDir, '.rubocop.yml'));
+
+      expect(await configPaths()).toEqual([]);
+      expect((await run()).findings).toHaveLength(0);
+    });
   });
 });
