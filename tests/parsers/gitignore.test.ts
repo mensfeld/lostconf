@@ -59,6 +59,7 @@ temp-*
     const patterns = gitignoreParser.parse('.gitignore', '\\#notes.md\n\\!bang.md\nspace\\ \n');
 
     expect(patterns.map((p) => p.value)).toEqual(['#notes.md', '!bang.md', 'space ']);
+    expect(patterns[1].type).toBe(PatternType.PATH);
     expect(patterns.every((p) => !p.negated)).toBe(true);
   });
 

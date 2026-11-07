@@ -47,8 +47,10 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
       continue;
     }
 
-    // Determine pattern type
-    const type = determinePatternType(patternValue);
+    // Determine pattern type; a leading ! left here was escaped and is literal
+    const type = determinePatternType(
+      patternValue.startsWith('!') ? patternValue.slice(1) : patternValue
+    );
 
     patterns.push({
       value: patternValue,

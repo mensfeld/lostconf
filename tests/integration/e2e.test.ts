@@ -257,9 +257,10 @@ src/**/*.tmp`
       await fs.mkdir(path.join(testDir, 'docs'));
       await fs.writeFile(path.join(testDir, 'docs', 'a.md'), '');
       await fs.writeFile(path.join(testDir, '#notes.md'), '');
+      await fs.writeFile(path.join(testDir, '!bang.md'), '');
       await fs.writeFile(
         path.join(testDir, '.remarkignore'),
-        '/CHANGELOG.md\ndocs/\n\\#notes.md\n'
+        '/CHANGELOG.md\ndocs/\n\\#notes.md\n\\!bang.md\n'
       );
 
       const result = await run();
