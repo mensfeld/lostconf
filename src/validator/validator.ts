@@ -41,7 +41,7 @@ export function validatePattern(
       return validatePathPattern(resolvedPattern, tree);
 
     case PatternType.GLOB:
-      return validateGlobPattern(resolvedPattern, files);
+      return validateGlobPattern(resolvedPattern, files, pattern.anchored);
 
     case PatternType.REGEX:
       return validateRegexPattern(resolvedPattern, files);
@@ -65,13 +65,14 @@ function validatePathPattern(
 /** Validate a glob pattern */
 function validateGlobPattern(
   patternValue: string,
-  files: string[]
+  files: string[],
+  anchored = false
 ): { valid: boolean; reason?: StaleReason } {
   if (!isValidGlob(patternValue)) {
     return { valid: false, reason: 'invalid_pattern' };
   }
 
-  const matches = globMatches(patternValue, files);
+  const matches = globMatches(patternValue, files, { anchored });
   if (matches.length > 0) {
     return { valid: true };
   }

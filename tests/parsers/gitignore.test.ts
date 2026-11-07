@@ -51,6 +51,7 @@ temp-*
     const patterns = gitignoreParser.parse('.gitignore', '/config.yml\n/coverage/\n!/keep.txt\n');
 
     expect(patterns.map((p) => p.value)).toEqual(['config.yml', 'coverage/', 'keep.txt']);
+    expect(patterns.every((p) => p.anchored)).toBe(true);
     expect(patterns[2].negated).toBe(true);
   });
 

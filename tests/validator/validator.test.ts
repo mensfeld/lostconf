@@ -50,6 +50,18 @@ describe('validatePattern', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('should invalidate a file path with a trailing slash', () => {
+      const pattern: Pattern = {
+        value: 'README.md/',
+        type: PatternType.PATH,
+        line: 1
+      };
+
+      const result = validatePattern(pattern, mockTree);
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('file_not_found');
+    });
+
     it('should invalidate non-existent path', () => {
       const pattern: Pattern = {
         value: 'src/missing.ts',

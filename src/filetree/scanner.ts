@@ -129,15 +129,22 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
 
 /** Check if a path exists in the file tree */
 export function pathExists(tree: FileTree, targetPath: string): boolean {
-  const normalized = targetPath.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
-  if (tree.files.has(normalized) || tree.directories.has(normalized)) {
+  const slashed = targetPath.replace(/\\/g, '/').replace(/^\.\//, '');
+  const normalized = slashed.replace(/\/+$/, '');
+  // A trailing / matches a directory only
+  const directoryOnly = normalized !== slashed;
+  if ((!directoryOnly && tree.files.has(normalized)) || tree.directories.has(normalized)) {
     return true;
   }
-  return existsThroughDirectorySymlink(tree, normalized);
+  return existsThroughDirectorySymlink(tree, normalized, directoryOnly);
 }
 
 /** Check a path below a directory symlink with one stat of the full path */
-function existsThroughDirectorySymlink(tree: FileTree, normalized: string): boolean {
+function existsThroughDirectorySymlink(
+  tree: FileTree,
+  normalized: string,
+  directoryOnly: boolean
+): boolean {
   if (!tree.directorySymlinks || tree.directorySymlinks.size === 0) {
     return false;
   }
@@ -147,7 +154,10 @@ function existsThroughDirectorySymlink(tree: FileTree, normalized: string): bool
   for (let i = 0; i < parts.length - 1; i++) {
     current = current ? `${current}/${parts[i]}` : parts[i];
     if (tree.directorySymlinks.has(current)) {
-      return fs.existsSync(path.join(tree.basePath, normalized));
+      const fullPath = path.join(tree.basePath, normalized);
+      return directoryOnly
+        ? fs.statSync(fullPath, { throwIfNoEntry: false })?.isDirectory() === true
+        : fs.existsSync(fullPath);
     }
   }
   return false;

@@ -37,7 +37,8 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
     patternValue = patternValue.replace(/^\\([#!])/, '$1');
 
     // A leading / anchors the pattern to the ignore file's directory
-    if (patternValue.startsWith('/')) {
+    const anchored = patternValue.startsWith('/');
+    if (anchored) {
       patternValue = patternValue.slice(1);
     }
 
@@ -54,7 +55,8 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
       type,
       line: lineNum,
       column: 1,
-      negated
+      negated,
+      ...(anchored && { anchored })
     });
   }
 

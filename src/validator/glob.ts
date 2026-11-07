@@ -9,6 +9,8 @@ export interface GlobMatchOptions {
   basePath?: string;
   /** Enable dot file matching */
   dot?: boolean;
+  /** Match from the root only, never by basename */
+  anchored?: boolean;
 }
 
 /** Check if any files match a glob pattern */
@@ -17,7 +19,7 @@ export function globMatches(
   files: string[],
   options: GlobMatchOptions = {}
 ): string[] {
-  const { dot = true } = options;
+  const { dot = true, anchored = false } = options;
 
   // Normalize pattern
   let normalizedPattern = pattern.replace(/\\/g, '/');
@@ -35,7 +37,7 @@ export function globMatches(
   try {
     const isMatch = picomatch(normalizedPattern, {
       dot,
-      basename: !normalizedPattern.includes('/')
+      basename: !anchored && !normalizedPattern.includes('/')
     });
     return files.filter((file) => isMatch(file));
   } catch {

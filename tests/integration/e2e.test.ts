@@ -277,6 +277,26 @@ src/**/*.tmp`
       expect(result.findings).toHaveLength(0);
     });
 
+    it('should match an anchored glob in a root ignore file at the root only', async () => {
+      await fs.mkdir(path.join(testDir, 'sub'));
+      await fs.writeFile(path.join(testDir, 'sub', 'x.md'), '');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '/*.md\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].pattern).toBe('*.md');
+    });
+
+    it('should not match a file with a trailing slash pattern', async () => {
+      await fs.writeFile(path.join(testDir, 'docs'), '');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'docs/\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+    });
+
     it('should report a missing anchored pattern', async () => {
       await fs.writeFile(path.join(testDir, '.remarkignore'), '/missing.md\n');
 
@@ -325,6 +345,17 @@ src/**/*.tmp`
       const result = await run();
 
       expect(result.findings).toHaveLength(0);
+    });
+
+    it('should match a trailing slash through a directory symlink to directories only', async () => {
+      await fs.mkdir(path.join(testDir, 'real', 'sub'), { recursive: true });
+      await fs.writeFile(path.join(testDir, 'real', 'a.rb'), '');
+      await fs.symlink('real', path.join(testDir, 'linked'));
+      await writeRubocop(testDir, ['linked/', 'linked/sub/', 'linked/a.rb/']);
+
+      const result = await run();
+
+      expect(result.findings.map((f) => f.pattern)).toEqual(['linked/a.rb/']);
     });
 
     it('should report a path through a directory symlink whose target is missing', async () => {
