@@ -3,6 +3,7 @@
  */
 
 import fg from 'fast-glob';
+import fs from 'fs';
 import path from 'path';
 import type { Parser } from '../plugin/types.js';
 
@@ -51,13 +52,25 @@ export async function discoverConfigs(
   // Default excludes
   const defaultExclude = ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**'];
 
-  // Find all matching config files
-  const files = await fg(searchPatterns, {
+  // Find all matching config files; directory symlinks are not followed, so a
+  // config is found once, at its real path, and symlink cycles cannot loop
+  const entries = await fg(searchPatterns, {
     cwd: basePath,
     dot: true,
-    onlyFiles: true,
+    onlyFiles: false,
+    objectMode: true,
+    followSymbolicLinks: false,
     ignore: [...defaultExclude, ...exclude]
   });
+
+  const files: string[] = [];
+  for (const entry of entries) {
+    if (entry.dirent.isFile()) {
+      files.push(entry.path);
+    } else if (entry.dirent.isSymbolicLink() && (await isFileTarget(basePath, entry.path))) {
+      files.push(entry.path);
+    }
+  }
 
   // Match files to parsers
   const discovered: DiscoveredConfig[] = [];
@@ -76,6 +89,15 @@ export async function discoverConfigs(
   }
 
   return discovered;
+}
+
+/** Check if a symlink points to a file */
+async function isFileTarget(basePath: string, link: string): Promise<boolean> {
+  try {
+    return (await fs.promises.stat(path.join(basePath, link))).isFile();
+  } catch {
+    return false;
+  }
 }
 
 /** Check if a file matches a parser's patterns */

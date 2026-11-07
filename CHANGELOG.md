@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Symlinks no longer cause false stale findings: symlinks to files and directories count as present, paths through a directory symlink are checked against their target, and config discovery no longer follows directory symlinks (a symlink cycle no longer yields duplicate configs)
+
 ## [0.4.1] - 2026-03-26
 
 ### Changed
