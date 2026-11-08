@@ -28,6 +28,14 @@ describe('End-to-End Integration Tests', () => {
     await fs.rm(testDir, { recursive: true, force: true });
   });
 
+  const run = async () => {
+    const engine = createEngine(getBuiltinParsers(), {
+      paths: [testDir],
+      verbose: false
+    });
+    return engine.run();
+  };
+
   it('should detect stale patterns in .gitignore', async () => {
     // Create .gitignore with stale patterns
     await fs.writeFile(
@@ -243,15 +251,75 @@ src/**/*.tmp`
     expect(result.findings[0].pattern).toBe('**/*.spec.js');
   });
 
-  describe('symlinks', () => {
-    const run = async () => {
-      const engine = createEngine(getBuiltinParsers(), {
-        paths: [testDir],
-        verbose: false
-      });
-      return engine.run();
-    };
+  describe('ignore file syntax', () => {
+    it('should resolve anchored, trailing-slash and escaped patterns', async () => {
+      await fs.writeFile(path.join(testDir, 'CHANGELOG.md'), '');
+      await fs.mkdir(path.join(testDir, 'docs'));
+      await fs.writeFile(path.join(testDir, 'docs', 'a.md'), '');
+      await fs.writeFile(path.join(testDir, '#notes.md'), '');
+      await fs.writeFile(path.join(testDir, '!bang.md'), '');
+      await fs.writeFile(
+        path.join(testDir, '.remarkignore'),
+        '/CHANGELOG.md\ndocs/\n\\#notes.md\n\\!bang.md\n'
+      );
 
+      const result = await run();
+
+      expect(result.findings).toHaveLength(0);
+    });
+
+    it('should anchor a leading / to the ignore file directory', async () => {
+      await fs.mkdir(path.join(testDir, 'sub'));
+      await fs.writeFile(path.join(testDir, 'sub', 'a.txt'), '');
+      await fs.writeFile(path.join(testDir, 'sub', '.gitignore'), '/a.txt\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(0);
+    });
+
+    it('should match an anchored glob in a root ignore file at the root only', async () => {
+      await fs.mkdir(path.join(testDir, 'sub'));
+      await fs.writeFile(path.join(testDir, 'sub', 'x.md'), '');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '/*.md\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].pattern).toBe('*.md');
+    });
+
+    it('should match an escaped leading ! in a glob literally', async () => {
+      await fs.writeFile(path.join(testDir, 'x.md'), '');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '\\!*.md\n');
+
+      expect((await run()).findings).toHaveLength(1);
+
+      await fs.writeFile(path.join(testDir, '!a.md'), '');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should not match a file with a trailing slash pattern', async () => {
+      await fs.writeFile(path.join(testDir, 'docs'), '');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'docs/\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+    });
+
+    it('should report a missing anchored pattern', async () => {
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '/missing.md\n');
+
+      const result = await run();
+
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].pattern).toBe('missing.md');
+    });
+  });
+
+  describe('symlinks', () => {
     const configPaths = async () =>
       (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);
 
@@ -281,6 +349,17 @@ src/**/*.tmp`
       const result = await run();
 
       expect(result.findings).toHaveLength(0);
+    });
+
+    it('should match a trailing slash through a directory symlink to directories only', async () => {
+      await fs.mkdir(path.join(testDir, 'real', 'sub'), { recursive: true });
+      await fs.writeFile(path.join(testDir, 'real', 'a.rb'), '');
+      await fs.symlink('real', path.join(testDir, 'linked'));
+      await writeRubocop(testDir, ['linked/', 'linked/sub/', 'linked/a.rb/']);
+
+      const result = await run();
+
+      expect(result.findings.map((f) => f.pattern)).toEqual(['linked/a.rb/']);
     });
 
     it('should report a path through a directory symlink whose target is missing', async () => {

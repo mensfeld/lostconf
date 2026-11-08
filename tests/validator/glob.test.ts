@@ -12,6 +12,10 @@ describe('globMatches', () => {
     '.gitignore'
   ];
 
+  it('should match a leading ! literally with literalBang', () => {
+    expect(globMatches('!*.md', ['!a.md', 'x.md'], { literalBang: true })).toEqual(['!a.md']);
+  });
+
   it('should match simple wildcard patterns', () => {
     const matches = globMatches('*.ts', files);
     expect(matches).toContain('src/index.ts');

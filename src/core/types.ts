@@ -34,6 +34,10 @@ export interface Pattern {
   column?: number;
   /** Whether this is a negated pattern (e.g., !pattern) */
   negated?: boolean;
+  /** Whether the pattern is anchored to the config directory (e.g., /pattern in an ignore file) */
+  anchored?: boolean;
+  /** Whether a leading ! is a literal character, not a negation (e.g., \!pattern in an ignore file) */
+  literalBang?: boolean;
   /** Base path for relative patterns */
   basePath?: string;
 }

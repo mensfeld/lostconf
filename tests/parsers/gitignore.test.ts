@@ -47,6 +47,29 @@ temp-*
     expect(patterns[2].type).toBe(PatternType.GLOB);
   });
 
+  it('should strip a leading / anchor', () => {
+    const patterns = gitignoreParser.parse('.gitignore', '/config.yml\n/coverage/\n!/keep.txt\n');
+
+    expect(patterns.map((p) => p.value)).toEqual(['config.yml', 'coverage/', 'keep.txt']);
+    expect(patterns.every((p) => p.anchored)).toBe(true);
+    expect(patterns[2].negated).toBe(true);
+  });
+
+  it('should unescape a leading # or ! and a trailing space', () => {
+    const patterns = gitignoreParser.parse('.gitignore', '\\#notes.md\n\\!bang.md\nspace\\ \n');
+
+    expect(patterns.map((p) => p.value)).toEqual(['#notes.md', '!bang.md', 'space ']);
+    expect(patterns[1].type).toBe(PatternType.PATH);
+    expect(patterns[1].literalBang).toBe(true);
+    expect(patterns.every((p) => !p.negated)).toBe(true);
+  });
+
+  it('should keep escapes of glob characters', () => {
+    const patterns = gitignoreParser.parse('.gitignore', '\\*literal\n');
+
+    expect(patterns[0].value).toBe('\\*literal');
+  });
+
   it('should handle negated patterns', () => {
     const content = `
 *.log
