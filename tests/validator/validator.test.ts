@@ -237,6 +237,17 @@ describe('validatePattern', () => {
       expect(isValid('vendor/a.rb', PatternType.PATH)).toBe(false);
     });
 
+    it('should keep a literal ! in the static base of a glob', () => {
+      const pattern: Pattern = {
+        value: '!.venv/**',
+        type: PatternType.GLOB,
+        line: 1,
+        literalBang: true
+      };
+
+      expect(validatePattern(pattern, tree).valid).toBe(false);
+    });
+
     it('should not validate a glob whose static base is above the ignored directory', () => {
       expect(isValid('**/*.py', PatternType.GLOB)).toBe(false);
       expect(isValid('*/lib/*.py', PatternType.GLOB)).toBe(false);
