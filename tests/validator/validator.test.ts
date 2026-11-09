@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import { validatePattern, validatePatterns } from '../../src/validator/validator.js';
 import { Pattern, PatternType } from '../../src/core/types.js';
 import { FileTree } from '../../src/filetree/scanner.js';
@@ -192,6 +195,63 @@ describe('validatePattern', () => {
 
       const result = validatePattern(pattern, tree, { configBasePath: 'packages/foo' });
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('default-ignored directories', () => {
+    let tree: FileTree;
+
+    beforeAll(async () => {
+      const basePath = await fs.mkdtemp(path.join(os.tmpdir(), 'lostconf-'));
+      await fs.mkdir(path.join(basePath, '.venv', 'lib'), { recursive: true });
+      await fs.mkdir(path.join(basePath, 'sub', 'node_modules'), { recursive: true });
+      await fs.writeFile(path.join(basePath, 'vendor'), '');
+      tree = { files: new Set(['vendor']), directories: new Set(['sub']), basePath };
+    });
+
+    afterAll(async () => {
+      await fs.rm(tree.basePath, { recursive: true, force: true });
+    });
+
+    const isValid = (value: string, type: PatternType, configBasePath?: string) =>
+      validatePattern({ value, type, line: 1 }, tree, { configBasePath }).valid;
+
+    it('should validate a glob inside an existing ignored directory', () => {
+      expect(isValid('.venv/**/*', PatternType.GLOB)).toBe(true);
+      expect(isValid('./.venv/lib/*.py', PatternType.GLOB)).toBe(true);
+      expect(isValid('node_modules/**/*.js', PatternType.GLOB, 'sub')).toBe(true);
+    });
+
+    it('should validate a path inside an existing ignored directory', () => {
+      expect(isValid('.venv/lib/missing.py', PatternType.PATH)).toBe(true);
+      expect(isValid('sub/node_modules/x', PatternType.PATH)).toBe(true);
+    });
+
+    it('should invalidate references inside a missing ignored directory', () => {
+      expect(isValid('node_modules/**/*', PatternType.GLOB)).toBe(false);
+      expect(isValid('node_modules/foo', PatternType.PATH)).toBe(false);
+      expect(isValid('.git/**/*', PatternType.GLOB, 'sub')).toBe(false);
+    });
+
+    it('should invalidate a reference below an ignored name that is a file', () => {
+      expect(isValid('vendor/**/*', PatternType.GLOB)).toBe(false);
+      expect(isValid('vendor/a.rb', PatternType.PATH)).toBe(false);
+    });
+
+    it('should keep a literal ! in the static base of a glob', () => {
+      const pattern: Pattern = {
+        value: '!.venv/**',
+        type: PatternType.GLOB,
+        line: 1,
+        literalBang: true
+      };
+
+      expect(validatePattern(pattern, tree).valid).toBe(false);
+    });
+
+    it('should not validate a glob whose static base is above the ignored directory', () => {
+      expect(isValid('**/*.py', PatternType.GLOB)).toBe(false);
+      expect(isValid('*/lib/*.py', PatternType.GLOB)).toBe(false);
     });
   });
 });

@@ -2,4 +2,10 @@
  * File tree data structure and utilities
  */
 
-export { FileTree, scanFileTree, pathExists, matchGlob } from './scanner.js';
+export {
+  FileTree,
+  scanFileTree,
+  pathExists,
+  existsInIgnoredDirectory,
+  matchGlob
+} from './scanner.js';

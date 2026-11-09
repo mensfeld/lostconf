@@ -36,6 +36,18 @@ describe('End-to-End Integration Tests', () => {
     return engine.run();
   };
 
+  const touch = async (file: string) => {
+    await fs.mkdir(path.dirname(path.join(testDir, file)), { recursive: true });
+    await fs.writeFile(path.join(testDir, file), '');
+  };
+
+  const writeRubocop = async (dir: string, excludes: string[]) => {
+    await fs.writeFile(
+      path.join(dir, '.rubocop.yml'),
+      `AllCops:\n  Exclude:\n${excludes.map((e) => `    - ${e}`).join('\n')}\n`
+    );
+  };
+
   it('should detect stale patterns in .gitignore', async () => {
     // Create .gitignore with stale patterns
     await fs.writeFile(
@@ -320,11 +332,6 @@ src/**/*.tmp`
   });
 
   describe('ignore file depth and directories', () => {
-    const touch = async (file: string) => {
-      await fs.mkdir(path.dirname(path.join(testDir, file)), { recursive: true });
-      await fs.writeFile(path.join(testDir, file), '');
-    };
-
     it('should match a name without / at any depth', async () => {
       await touch('docs/NOTES.md');
       await fs.writeFile(path.join(testDir, '.remarkignore'), 'NOTES.md\n');
@@ -423,13 +430,6 @@ src/**/*.tmp`
     const configPaths = async () =>
       (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);
 
-    const writeRubocop = async (dir: string, excludes: string[]) => {
-      await fs.writeFile(
-        path.join(dir, '.rubocop.yml'),
-        `AllCops:\n  Exclude:\n${excludes.map((e) => `    - ${e}`).join('\n')}\n`
-      );
-    };
-
     it('should treat a symlink to a file as present', async () => {
       await fs.writeFile(path.join(testDir, 'real.rb'), '');
       await fs.symlink('real.rb', path.join(testDir, 'link.rb'));
@@ -520,6 +520,46 @@ src/**/*.tmp`
 
       expect(await configPaths()).toEqual([]);
       expect((await run()).findings).toHaveLength(0);
+    });
+  });
+
+  describe('default-ignored directories', () => {
+    it('should treat references inside an existing ignored directory as present', async () => {
+      await touch('.venv/lib/a.py');
+      await touch('vendor/bundle/a.rb');
+      await writeRubocop(testDir, ['.venv/**/*', 'vendor/**/*', 'node_modules/foo']);
+      await fs.mkdir(path.join(testDir, 'node_modules'));
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should report a glob inside a missing ignored directory', async () => {
+      await writeRubocop(testDir, ['.venv/**/*']);
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['.venv/**/*']);
+    });
+
+    it('should treat a reference inside a nested ignored directory as present', async () => {
+      await touch('sub/node_modules/x/a.js');
+      await writeRubocop(testDir, ['sub/node_modules/x', 'sub/node_modules/**/*.js']);
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should resolve an ignored directory relative to a nested config', async () => {
+      await touch('sub/vendor/a.rb');
+      await writeRubocop(path.join(testDir, 'sub'), ['vendor/**/*']);
+      await writeRubocop(testDir, ['vendor/**/*']);
+
+      const findings = (await run()).findings;
+      expect(findings.map((f) => `${f.file}:${f.pattern}`)).toEqual(['.rubocop.yml:vendor/**/*']);
+    });
+
+    it('should not change a glob whose static base is above an ignored directory', async () => {
+      await touch('.venv/lib/a.py');
+      await writeRubocop(testDir, ['"**/*.py"']);
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['**/*.py']);
     });
   });
 });
