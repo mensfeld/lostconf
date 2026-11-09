@@ -319,6 +319,106 @@ src/**/*.tmp`
     });
   });
 
+  describe('ignore file depth and directories', () => {
+    const touch = async (file: string) => {
+      await fs.mkdir(path.dirname(path.join(testDir, file)), { recursive: true });
+      await fs.writeFile(path.join(testDir, file), '');
+    };
+
+    it('should match a name without / at any depth', async () => {
+      await touch('docs/NOTES.md');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'NOTES.md\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should match a glob without / at any depth below a nested ignore file', async () => {
+      await touch('sub/deep/x.log');
+      await fs.writeFile(path.join(testDir, 'sub', '.gitignore'), '*.log\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should match a directory name with a trailing / at any depth', async () => {
+      await touch('a/logs/x.txt');
+      await touch('b/cache');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'logs/\ncache/\n');
+
+      const result = await run();
+
+      expect(result.findings.map((f) => f.pattern)).toEqual(['cache/']);
+    });
+
+    it('should match globs against directories', async () => {
+      await touch('spec/fixtures/a.md');
+      await touch('spec/unit/a.md');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), '**/fixtures\nspec/*\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should match .dockerignore globs against directories', async () => {
+      await touch('tmp/cache/a.bin');
+      await fs.writeFile(path.join(testDir, '.dockerignore'), 'tmp/*\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should keep .dockerignore names at the build context root', async () => {
+      await touch('deep/secret.txt');
+      await fs.writeFile(path.join(testDir, '.dockerignore'), 'secret.txt\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
+    it('should match .dockerignore globs from the build context root only', async () => {
+      await touch('a/tmp/x');
+      await touch('b/x.log');
+      await fs.writeFile(path.join(testDir, '.dockerignore'), 'tm*\ntm?/\n*.log\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['tm*', 'tm?/', '*.log']);
+    });
+
+    it('should match a glob with a trailing / against directories only', async () => {
+      await touch('a/buildx');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'build*/\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
+    it('should match a name only below the ignore file directory', async () => {
+      await touch('other/NOTES.md');
+      await touch('sub/a.md');
+      await fs.writeFile(path.join(testDir, 'sub', '.gitignore'), 'NOTES.md\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
+    it('should match a name only as a whole path segment', async () => {
+      await touch('docs/NOTES.md');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'TES.md\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
+    it('should report a missing name', async () => {
+      await touch('docs/a.md');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'MISSING.md\n\\!*.md\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['MISSING.md', '!*.md']);
+    });
+
+    it('should not match directories for other parsers', async () => {
+      await touch('spec/unit/a_spec.rb');
+      await fs.writeFile(
+        path.join(testDir, '.rubocop.yml'),
+        'AllCops:\n  Exclude:\n    - spec/*\n'
+      );
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+  });
+
   describe('symlinks', () => {
     const configPaths = async () =>
       (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);

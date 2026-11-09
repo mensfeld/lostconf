@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   gitignoreParser,
+  dockerignoreParser,
   remarkignoreParser,
   lycheeignoreParser,
   secretlintignoreParser,
@@ -29,7 +30,9 @@ dist
       type: PatternType.PATH,
       line: 2,
       column: 1,
-      negated: false
+      negated: false,
+      matchDirectories: true,
+      anyDepth: true
     });
   });
 
@@ -53,6 +56,23 @@ temp-*
     expect(patterns.map((p) => p.value)).toEqual(['config.yml', 'coverage/', 'keep.txt']);
     expect(patterns.every((p) => p.anchored)).toBe(true);
     expect(patterns[2].negated).toBe(true);
+  });
+
+  it('should match names without a / other than a trailing one at any depth', () => {
+    const patterns = gitignoreParser.parse(
+      '.gitignore',
+      'NOTES.md\nlogs/\n*.log\ndocs/a.md\n/root.md\n'
+    );
+
+    expect(patterns.map((p) => p.anyDepth === true)).toEqual([true, true, true, false, false]);
+  });
+
+  it('should keep .dockerignore names at the build context root', () => {
+    const patterns = dockerignoreParser.parse('.dockerignore', 'secret.txt\ntmp/*\n');
+
+    expect(patterns.some((p) => p.anyDepth)).toBe(false);
+    expect(patterns.every((p) => p.anchored)).toBe(true);
+    expect(patterns.every((p) => p.matchDirectories)).toBe(true);
   });
 
   it('should unescape a leading # or ! and a trailing space', () => {
