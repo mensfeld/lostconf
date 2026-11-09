@@ -50,14 +50,15 @@ export function validatePattern(
       if (!pattern.matchDirectories) {
         return validateGlobPattern(resolvedPattern, files, globOptions);
       }
-      if (resolvedPattern.endsWith('/')) {
-        return validateGlobPattern(
-          resolvedPattern.replace(/\/+$/, ''),
-          Array.from(tree.directories),
-          globOptions
-        );
+      const directoryOnly = resolvedPattern.endsWith('/');
+      const globPattern = resolvedPattern.replace(/\/+$/, '');
+      if (!directoryOnly) {
+        const result = validateGlobPattern(globPattern, files, globOptions);
+        if (result.reason !== 'no_matches') {
+          return result;
+        }
       }
-      return validateGlobPattern(resolvedPattern, [...files, ...tree.directories], globOptions);
+      return validateGlobPattern(globPattern, Array.from(tree.directories), globOptions);
     }
 
     case PatternType.REGEX:
