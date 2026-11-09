@@ -31,21 +31,34 @@ export function validatePattern(
   const { configBasePath } = options;
   const files = Array.from(tree.files);
 
+  if (pattern.anyDepth && pattern.type === PatternType.PATH) {
+    return validateAnyDepthPathPattern(pattern.value, tree, configBasePath);
+  }
+
   // Resolve pattern relative to config file location
-  let resolvedPattern = pattern.value;
+  let resolvedPattern = pattern.anyDepth ? path.join('**', pattern.value) : pattern.value;
   if (configBasePath && !path.isAbsolute(pattern.value)) {
-    resolvedPattern = path.join(configBasePath, pattern.value);
+    resolvedPattern = path.join(configBasePath, resolvedPattern);
   }
 
   switch (pattern.type) {
     case PatternType.PATH:
       return validatePathPattern(resolvedPattern, tree);
 
-    case PatternType.GLOB:
-      return validateGlobPattern(resolvedPattern, files, {
-        anchored: pattern.anchored,
-        literalBang: pattern.literalBang
-      });
+    case PatternType.GLOB: {
+      const globOptions = { anchored: pattern.anchored, literalBang: pattern.literalBang };
+      if (!pattern.matchDirectories) {
+        return validateGlobPattern(resolvedPattern, files, globOptions);
+      }
+      if (resolvedPattern.endsWith('/')) {
+        return validateGlobPattern(
+          resolvedPattern.replace(/\/+$/, ''),
+          Array.from(tree.directories),
+          globOptions
+        );
+      }
+      return validateGlobPattern(resolvedPattern, [...files, ...tree.directories], globOptions);
+    }
 
     case PatternType.REGEX:
       return validateRegexPattern(resolvedPattern, files);
@@ -53,6 +66,36 @@ export function validatePattern(
     default:
       return { valid: true };
   }
+}
+
+/** Validate a path name that matches at any depth below the config directory */
+function validateAnyDepthPathPattern(
+  patternValue: string,
+  tree: FileTree,
+  configBasePath = '.'
+): { valid: boolean; reason?: StaleReason } {
+  if (pathExists(tree, path.join(configBasePath, patternValue))) {
+    return { valid: true };
+  }
+
+  const directoryOnly = patternValue.endsWith('/');
+  const suffix = '/' + patternValue.replace(/\/+$/, '');
+  const prefix = configBasePath === '.' ? '' : configBasePath + '/';
+  const matches = (entry: string) => entry.startsWith(prefix) && entry.endsWith(suffix);
+
+  for (const dir of tree.directories) {
+    if (matches(dir)) {
+      return { valid: true };
+    }
+  }
+  if (!directoryOnly) {
+    for (const file of tree.files) {
+      if (matches(file)) {
+        return { valid: true };
+      }
+    }
+  }
+  return { valid: false, reason: 'file_not_found' };
 }
 
 /** Validate an exact path pattern */

@@ -8,7 +8,11 @@ import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
 
 /** Parse a gitignore-style file and extract patterns */
-function parseIgnoreFile(filename: string, content: string): Pattern[] {
+function parseIgnoreFile(
+  filename: string,
+  content: string,
+  { rootOnly = false }: { rootOnly?: boolean } = {}
+): Pattern[] {
   const patterns: Pattern[] = [];
   const lines = content.split('\n');
 
@@ -53,13 +57,18 @@ function parseIgnoreFile(filename: string, content: string): Pattern[] {
     // Determine pattern type
     const type = determinePatternType(literalBang ? patternValue.slice(1) : patternValue);
 
+    // A pattern with no / other than a trailing one matches at any depth
+    const anyDepth = !rootOnly && !anchored && !patternValue.replace(/\/+$/, '').includes('/');
+
     patterns.push({
       value: patternValue,
       type,
       line: lineNum,
       column: 1,
       negated,
+      matchDirectories: true,
       ...(anchored && { anchored }),
+      ...(anyDepth && { anyDepth }),
       ...(literalBang && { literalBang })
     });
   }
@@ -85,11 +94,11 @@ export const gitignoreParser: Parser = {
   parse: parseIgnoreFile
 };
 
-/** Dockerignore parser (same format) */
+/** Dockerignore parser (same format, every pattern is relative to the build context root) */
 export const dockerignoreParser: Parser = {
   name: 'dockerignore',
   filePatterns: ['.dockerignore'],
-  parse: parseIgnoreFile
+  parse: (filename, content) => parseIgnoreFile(filename, content, { rootOnly: true })
 };
 
 /** Remarkignore parser (remark markdown processor) */

@@ -36,6 +36,10 @@ export interface Pattern {
   negated?: boolean;
   /** Whether the pattern is anchored to the config directory (e.g., /pattern in an ignore file) */
   anchored?: boolean;
+  /** Whether the pattern matches at any depth below the config directory (e.g., name in an ignore file) */
+  anyDepth?: boolean;
+  /** Whether the pattern also matches directories, not only files (e.g., glob in an ignore file) */
+  matchDirectories?: boolean;
   /** Whether a leading ! is a literal character, not a negation (e.g., \!pattern in an ignore file) */
   literalBang?: boolean;
   /** Base path for relative patterns */
