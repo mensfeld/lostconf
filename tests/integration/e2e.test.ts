@@ -524,7 +524,7 @@ src/**/*.tmp`
   });
 
   describe('default-ignored directories', () => {
-    it('should treat a glob inside an existing ignored directory as present', async () => {
+    it('should treat references inside an existing ignored directory as present', async () => {
       await touch('.venv/lib/a.py');
       await touch('vendor/bundle/a.rb');
       await writeRubocop(testDir, ['.venv/**/*', 'vendor/**/*', 'node_modules/foo']);
