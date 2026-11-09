@@ -7,11 +7,16 @@ import { PatternType } from '../core/types.js';
 import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
 
+interface IgnoreFileOptions {
+  /** Match every pattern from the ignore file's directory only, never at any depth */
+  rootOnly?: boolean;
+}
+
 /** Parse a gitignore-style file and extract patterns */
 function parseIgnoreFile(
   filename: string,
   content: string,
-  { rootOnly = false }: { rootOnly?: boolean } = {}
+  options: IgnoreFileOptions = {}
 ): Pattern[] {
   const patterns: Pattern[] = [];
   const lines = content.split('\n');
@@ -58,10 +63,8 @@ function parseIgnoreFile(
     const type = determinePatternType(literalBang ? patternValue.slice(1) : patternValue);
 
     // A pattern with no / other than a trailing one matches at any depth
-    const anyDepth = !rootOnly && !anchored && !patternValue.replace(/\/+$/, '').includes('/');
-
-    // Every pattern in a root-only file matches from the config directory, never by basename
-    const rootAnchored = anchored || rootOnly;
+    const anyDepth =
+      !options.rootOnly && !anchored && !patternValue.replace(/\/+$/, '').includes('/');
 
     patterns.push({
       value: patternValue,
@@ -70,7 +73,8 @@ function parseIgnoreFile(
       column: 1,
       negated,
       matchDirectories: true,
-      ...(rootAnchored && { anchored: rootAnchored }),
+      // Every pattern in a root-only file matches from the config directory, never by basename
+      ...((anchored || options.rootOnly) && { anchored: true }),
       ...(anyDepth && { anyDepth }),
       ...(literalBang && { literalBang })
     });
