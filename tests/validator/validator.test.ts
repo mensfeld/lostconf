@@ -197,6 +197,7 @@ describe('validatePattern', () => {
       expect(result.valid).toBe(true);
     });
   });
+
   describe('default-ignored directories', () => {
     let tree: FileTree;
 
