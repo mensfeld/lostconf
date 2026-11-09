@@ -60,6 +60,9 @@ function parseIgnoreFile(
     // A pattern with no / other than a trailing one matches at any depth
     const anyDepth = !rootOnly && !anchored && !patternValue.replace(/\/+$/, '').includes('/');
 
+    // Every pattern in a root-only file matches from the config directory, never by basename
+    const rootAnchored = anchored || rootOnly;
+
     patterns.push({
       value: patternValue,
       type,
@@ -67,7 +70,7 @@ function parseIgnoreFile(
       column: 1,
       negated,
       matchDirectories: true,
-      ...(anchored && { anchored }),
+      ...(rootAnchored && { anchored: rootAnchored }),
       ...(anyDepth && { anyDepth }),
       ...(literalBang && { literalBang })
     });

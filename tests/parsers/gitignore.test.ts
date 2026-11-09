@@ -71,6 +71,7 @@ temp-*
     const patterns = dockerignoreParser.parse('.dockerignore', 'secret.txt\ntmp/*\n');
 
     expect(patterns.some((p) => p.anyDepth)).toBe(false);
+    expect(patterns.every((p) => p.anchored)).toBe(true);
     expect(patterns.every((p) => p.matchDirectories)).toBe(true);
   });
 

@@ -371,6 +371,36 @@ src/**/*.tmp`
       expect((await run()).findings).toHaveLength(1);
     });
 
+    it('should match .dockerignore globs from the build context root only', async () => {
+      await touch('a/tmp/x');
+      await touch('b/x.log');
+      await fs.writeFile(path.join(testDir, '.dockerignore'), 'tm*\ntm?/\n*.log\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['tm*', 'tm?/', '*.log']);
+    });
+
+    it('should match a glob with a trailing / against directories only', async () => {
+      await touch('a/buildx');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'build*/\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
+    it('should match a name only below the ignore file directory', async () => {
+      await touch('other/NOTES.md');
+      await touch('sub/a.md');
+      await fs.writeFile(path.join(testDir, 'sub', '.gitignore'), 'NOTES.md\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
+    it('should match a name only as a whole path segment', async () => {
+      await touch('docs/NOTES.md');
+      await fs.writeFile(path.join(testDir, '.remarkignore'), 'TES.md\n');
+
+      expect((await run()).findings).toHaveLength(1);
+    });
+
     it('should report a missing name', async () => {
       await touch('docs/a.md');
       await fs.writeFile(path.join(testDir, '.remarkignore'), 'MISSING.md\n\\!*.md\n');
