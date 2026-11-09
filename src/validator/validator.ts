@@ -3,9 +3,10 @@
  */
 
 import path from 'path';
+import picomatch from 'picomatch';
 import type { Pattern, Finding, StaleReason } from '../core/types.js';
 import { PatternType } from '../core/types.js';
-import { pathExists } from '../filetree/tree.js';
+import { pathExists, existsInIgnoredDirectory } from '../filetree/tree.js';
 import type { FileTree } from '../filetree/tree.js';
 import { globMatches, isValidGlob } from './glob.js';
 import type { GlobMatchOptions } from './glob.js';
@@ -47,6 +48,9 @@ export function validatePattern(
 
     case PatternType.GLOB: {
       const globOptions = { anchored: pattern.anchored, literalBang: pattern.literalBang };
+      if (globBaseInIgnoredDirectory(resolvedPattern, tree, globOptions)) {
+        return { valid: true };
+      }
       if (!pattern.matchDirectories) {
         return validateGlobPattern(resolvedPattern, files, globOptions);
       }
@@ -67,6 +71,17 @@ export function validatePattern(
     default:
       return { valid: true };
   }
+}
+
+/** Check if a glob's static base (before the first glob character) is in an existing default-ignored directory */
+function globBaseInIgnoredDirectory(
+  patternValue: string,
+  tree: FileTree,
+  globOptions: GlobMatchOptions = {}
+): boolean {
+  const normalized = patternValue.replace(/\\/g, '/').replace(/^\.\//, '');
+  const { base } = picomatch.scan(normalized, { nonegate: globOptions.literalBang });
+  return base !== '' && existsInIgnoredDirectory(tree, base);
 }
 
 /** Validate a path name that matches at any depth below the config directory */

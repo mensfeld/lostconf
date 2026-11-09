@@ -26,20 +26,23 @@ export interface FileTree {
   basePath: string;
 }
 
+/** Directory names left out of the scan at any depth */
+const DEFAULT_IGNORE_DIRECTORIES = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '.next',
+  'coverage',
+  '__pycache__',
+  '.venv',
+  'venv',
+  '.tox',
+  'vendor'
+]);
+
 /** Default ignore patterns */
-const DEFAULT_IGNORE = [
-  '**/node_modules/**',
-  '**/.git/**',
-  '**/dist/**',
-  '**/build/**',
-  '**/.next/**',
-  '**/coverage/**',
-  '**/__pycache__/**',
-  '**/.venv/**',
-  '**/venv/**',
-  '**/.tox/**',
-  '**/vendor/**'
-];
+const DEFAULT_IGNORE = [...DEFAULT_IGNORE_DIRECTORIES].map((dir) => `**/${dir}/**`);
 
 /** Files and directory symlinks among fast-glob entries */
 export interface ClassifiedEntries {
@@ -135,7 +138,26 @@ export function pathExists(tree: FileTree, targetPath: string): boolean {
   if ((!directoryOnly && tree.files.has(normalized)) || tree.directories.has(normalized)) {
     return true;
   }
-  return existsThroughDirectorySymlink(tree, normalized, directoryOnly);
+  return (
+    existsThroughDirectorySymlink(tree, normalized, directoryOnly) ||
+    existsInIgnoredDirectory(tree, normalized)
+  );
+}
+
+/**
+ * Check if a path is inside a default-ignored directory that exists.
+ * The scan skips those directories, so their contents count as present
+ * without a deeper lookup.
+ */
+export function existsInIgnoredDirectory(tree: FileTree, targetPath: string): boolean {
+  const parts = targetPath.split('/');
+  for (let i = 0; i < parts.length; i++) {
+    if (DEFAULT_IGNORE_DIRECTORIES.has(parts[i])) {
+      const dir = path.join(tree.basePath, ...parts.slice(0, i + 1));
+      return fs.statSync(dir, { throwIfNoEntry: false })?.isDirectory() === true;
+    }
+  }
+  return false;
 }
 
 /** Check a path below a directory symlink with one stat of the full path */
