@@ -32,7 +32,7 @@ jobs:
           cache: 'npm'
 
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@11.21.1 # npm 12+ requires Node >=22.22; npm >=11.5.1 needed for trusted publishing
 
       - name: Install dependencies
         run: npm ci
