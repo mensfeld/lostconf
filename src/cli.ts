@@ -14,7 +14,7 @@ import { createSarifFormatter } from './output/sarif.js';
 import type { Formatter } from './output/formatter.js';
 import { Severity } from './core/types.js';
 
-const VERSION = '0.4.1';
+const VERSION = '0.5.0';
 
 const HELP = `Usage: lostconf [options] [paths...]
 

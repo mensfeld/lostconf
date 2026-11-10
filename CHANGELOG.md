@@ -7,20 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- Symlinks no longer cause false stale findings: symlinks to files and directories count as present, paths through a directory symlink are checked against their target, and config discovery no longer follows directory symlinks (a symlink cycle no longer yields duplicate configs)
-- Paths with a trailing `/` (`docs/`, `./logs/`) now match existing directories
-- Ignore files (`.gitignore`, `.remarkignore`, ...): a leading `/` anchors the pattern to the ignore file's directory instead of the filesystem root, and the escapes `\#`, `\!` and a trailing `\ ` are unescaped; findings for anchored patterns now show the pattern without the leading `/`
-- Ignore files: a pattern with no `/` other than a trailing one (`NOTES.md`, `*.log`, `logs/`) now matches at any depth below the ignore file's directory (not in `.dockerignore`, where every pattern, globs included, now matches from the build context root only, so `*.log` no longer matches `a/x.log`), and globs (`**/fixtures`, `spec/*`) also match directories
-- References inside a default-ignored directory that the scan skips (`node_modules`, `.git`, `vendor`, `.venv`, ...) now count as present when that directory exists (`vendor/**/*`, `.venv/lib/a.py`), instead of being reported as stale
+## [0.5.0] - 2026-11-10
 
-## [0.4.1] - 2026-03-26
+### Added
+- Respect the `NO_COLOR` environment variable and disable ANSI colors when stdout is not a TTY
 
 ### Changed
 - Replaced `chalk` dependency with inline ANSI color helpers (zero-dependency text coloring)
 - Replaced `commander` dependency with Node.js built-in `node:util parseArgs` (stable since Node 18.3)
 - Replaced `micromatch` dependency with `picomatch` (already a transitive dependency via `fast-glob`)
 - Reduced runtime dependencies from 6 to 4: `fast-glob`, `picomatch`, `smol-toml`, `yaml`
+- Minimum supported Node.js version is now 18.3.0 (required for `node:util parseArgs`)
+
+### Fixed
+- Symlinks no longer cause false stale findings: symlinks to files and directories count as present, paths through a directory symlink are checked against their target, and config discovery no longer follows directory symlinks (a symlink cycle no longer yields duplicate configs)
+- Paths with a trailing `/` (`docs/`, `./logs/`) now match existing directories
+- Ignore files (`.gitignore`, `.remarkignore`, ...): a leading `/` anchors the pattern to the ignore file's directory instead of the filesystem root, and the escapes `\#`, `\!` and a trailing `\ ` are unescaped; findings for anchored patterns now show the pattern without the leading `/`
+- Ignore files: a pattern with no `/` other than a trailing one (`NOTES.md`, `*.log`, `logs/`) now matches at any depth below the ignore file's directory (not in `.dockerignore`, where every pattern, globs included, now matches from the build context root only, so `*.log` no longer matches `a/x.log`), and globs (`**/fixtures`, `spec/*`) also match directories
+- References inside a default-ignored directory that the scan skips (`node_modules`, `.git`, `vendor`, `.venv`, ...) now count as present when that directory exists (`vendor/**/*`, `.venv/lib/a.py`), instead of being reported as stale
 
 ## [0.4.0] - 2026-01-27
 
@@ -145,8 +149,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Examples for CI/CD integration
 - Contributing guidelines
 
-[Unreleased]: https://github.com/mensfeld/lostconf/compare/v0.4.1...HEAD
-[0.4.1]: https://github.com/mensfeld/lostconf/compare/v0.4.0...v0.4.1
+[Unreleased]: https://github.com/mensfeld/lostconf/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/mensfeld/lostconf/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/mensfeld/lostconf/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mensfeld/lostconf/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/mensfeld/lostconf/compare/v0.2.0...v0.2.1
