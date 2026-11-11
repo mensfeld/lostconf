@@ -44,4 +44,12 @@ src/**/*.test.ts
     expect(patterns[1].negated).toBe(true);
     expect(patterns[1].value).toBe('important.js');
   });
+
+  it('should match names at any depth and globs against directories', () => {
+    const patterns = eslintIgnoreParser.parse('.eslintignore', 'NOTES.md\n/dist\n**/fixtures\n');
+
+    expect(patterns.map((p) => p.anyDepth === true)).toEqual([true, false, false]);
+    expect(patterns[1]).toMatchObject({ value: 'dist', anchored: true });
+    expect(patterns.every((p) => p.matchDirectories)).toBe(true);
+  });
 });
