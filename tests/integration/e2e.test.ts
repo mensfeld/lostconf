@@ -562,6 +562,13 @@ src/**/*.tmp`
       expect((await run()).findings).toHaveLength(0);
     });
 
+    it('should report a directory-only ignored name that matches only a file', async () => {
+      await touch('pkg/node_modules');
+      await fs.writeFile(path.join(testDir, '.gitignore'), 'node_modules/\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['node_modules/']);
+    });
+
     it('should report an any-depth ignored directory name that matches nothing', async () => {
       await touch('pkg/index.js');
       await fs.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');

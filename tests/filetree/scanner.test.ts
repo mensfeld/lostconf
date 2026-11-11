@@ -13,6 +13,9 @@ describe('scanFileTree', () => {
       await fs.mkdir(path.join(basePath, 'pkg', 'node_modules', 'x'), { recursive: true });
       await fs.writeFile(path.join(basePath, 'pkg', 'node_modules', 'x', 'a.js'), '');
       await fs.writeFile(path.join(basePath, 'pkg', 'node_modules', 'b.js'), '');
+      await fs.mkdir(path.join(basePath, 'lib'));
+      await fs.writeFile(path.join(basePath, 'lib', 'a.js'), '');
+      await fs.writeFile(path.join(basePath, 'lib', 'node_modules'), '');
       tree = await scanFileTree({ paths: [basePath] });
     });
 
@@ -21,11 +24,11 @@ describe('scanFileTree', () => {
     });
 
     it('should list a nested ignored directory and its parents', () => {
-      expect([...tree.directories].sort()).toEqual(['pkg', 'pkg/node_modules']);
+      expect([...tree.directories].sort()).toEqual(['lib', 'pkg', 'pkg/node_modules']);
     });
 
-    it('should not list the contents of an ignored directory', () => {
-      expect(tree.files.size).toBe(0);
+    it('should not list the contents of an ignored directory or a file with an ignored name', () => {
+      expect([...tree.files]).toEqual(['lib/a.js']);
     });
 
     it('should scan a base path that has an ignored directory name', async () => {
