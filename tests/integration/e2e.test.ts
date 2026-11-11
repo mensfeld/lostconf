@@ -588,6 +588,14 @@ src/**/*.tmp`
       expect((await run()).findings).toHaveLength(0);
     });
 
+    it('should treat a .git symlink to a gitdir file as present', async () => {
+      await fs.writeFile(path.join(testDir, 'gitdir'), 'gitdir: ../repo/.git/worktrees/a\n');
+      await fs.symlink('gitdir', path.join(testDir, '.git'));
+      await fs.writeFile(path.join(testDir, '.gitignore'), '.git\n/.git\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
     it('should report directory references to a .git file', async () => {
       await fs.writeFile(path.join(testDir, '.git'), 'gitdir: ../repo/.git/worktrees/a\n');
       await fs.writeFile(path.join(testDir, '.gitignore'), '.git/\n.git/config\n');
