@@ -415,6 +415,17 @@ src/**/*.tmp`
       expect((await run()).findings.map((f) => f.pattern)).toEqual(['MISSING.md', '!*.md']);
     });
 
+    it.each(['.prettierignore', '.eslintignore'])(
+      'should match %s names at any depth and globs against directories',
+      async (file) => {
+        await touch('docs/NOTES.md');
+        await touch('spec/fixtures/a.md');
+        await fs.writeFile(path.join(testDir, file), 'NOTES.md\n**/fixtures\nMISSING.md\n');
+
+        expect((await run()).findings.map((f) => f.pattern)).toEqual(['MISSING.md']);
+      }
+    );
+
     it('should not match directories for other parsers', async () => {
       await touch('spec/unit/a_spec.rb');
       await fs.writeFile(
