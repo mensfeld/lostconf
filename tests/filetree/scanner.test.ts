@@ -31,6 +31,19 @@ describe('scanFileTree', () => {
       expect([...tree.files]).toEqual(['lib/a.js']);
     });
 
+    it('should list a .git file and not a .git directory as a file', async () => {
+      const basePath = await fs.mkdtemp(path.join(os.tmpdir(), 'lostconf-'));
+      await fs.mkdir(path.join(basePath, '.git'));
+      await fs.writeFile(path.join(basePath, '.git', 'HEAD'), '');
+      await fs.mkdir(path.join(basePath, 'sub'));
+      await fs.writeFile(path.join(basePath, 'sub', '.git'), 'gitdir: ../.git/modules/sub\n');
+      const gitTree = await scanFileTree({ paths: [basePath] });
+      await fs.rm(basePath, { recursive: true, force: true });
+
+      expect([...gitTree.files]).toEqual(['sub/.git']);
+      expect([...gitTree.directories].sort()).toEqual(['.git', 'sub']);
+    });
+
     it('should scan a base path that has an ignored directory name', async () => {
       const subtree = await scanFileTree({
         paths: [path.join(tree.basePath, 'pkg', 'node_modules')]

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Count an any-depth ignore-file name as present when it matches only a nested default-ignored directory (e.g. `node_modules` with only `pkg/node_modules`)
+- Count a `.git` file (git worktree or submodule) as present, instead of reporting `.git` references as stale
 
 ## [0.5.0] - 2026-11-10
 

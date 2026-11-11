@@ -576,6 +576,39 @@ src/**/*.tmp`
       expect((await run()).findings.map((f) => f.pattern)).toEqual(['node_modules']);
     });
 
+    it('should treat a .git file of a worktree or submodule as present', async () => {
+      await fs.writeFile(path.join(testDir, '.git'), 'gitdir: ../repo/.git/worktrees/a\n');
+      await fs.mkdir(path.join(testDir, 'sub'));
+      await fs.writeFile(path.join(testDir, 'sub', '.git'), 'gitdir: ../.git/modules/sub\n');
+      await fs.writeFile(
+        path.join(testDir, '.gitignore'),
+        '.git\n/.git\nsub/.git\n**/.git\n.gi?\n'
+      );
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should report directory references to a .git file', async () => {
+      await fs.writeFile(path.join(testDir, '.git'), 'gitdir: ../repo/.git/worktrees/a\n');
+      await fs.writeFile(path.join(testDir, '.gitignore'), '.git/\n.git/config\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['.git/', '.git/config']);
+    });
+
+    it('should treat a .git directory as present', async () => {
+      await touch('.git/config');
+      await fs.writeFile(path.join(testDir, '.gitignore'), '.git\n.git/\n.git/config\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should report a .git reference when there is no .git', async () => {
+      await touch('sub/a.js');
+      await fs.writeFile(path.join(testDir, '.gitignore'), '.git\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['.git']);
+    });
+
     it('should not change a glob whose static base is above an ignored directory', async () => {
       await touch('.venv/lib/a.py');
       await writeRubocop(testDir, ['"**/*.py"']);

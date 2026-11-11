@@ -129,7 +129,8 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
     fs: { readdir: skipIgnoredReaddir(basePath) }
   });
 
-  // Default-ignored names count as directories only; other entries with those names stay out
+  // Default-ignored names count as directories only; other entries with those names stay out,
+  // except a .git file (git worktree or submodule)
   const ignoredDirectories: string[] = [];
   const otherEntries = entries.filter((entry) => {
     if (!DEFAULT_IGNORE_DIRECTORIES.has(entry.name)) {
@@ -138,7 +139,7 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
     if (entry.dirent.isDirectory()) {
       ignoredDirectories.push(entry.path);
     }
-    return false;
+    return entry.name === '.git' && entry.dirent.isFile();
   });
 
   const { files, directorySymlinks } = await classifyEntries(basePath, otherEntries);
