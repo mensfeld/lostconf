@@ -573,4 +573,23 @@ src/**/*.tmp`
       expect((await run()).findings.map((f) => f.pattern)).toEqual(['**/*.py']);
     });
   });
+
+  describe('regex patterns', () => {
+    it('should treat a regex that matches a file as valid', async () => {
+      await touch('lib/old_1.rb');
+      await writeRubocop(testDir, ['^lib/old_\\d+\\.rb$']);
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should report a regex that matches no file', async () => {
+      await touch('lib/new.rb');
+      await writeRubocop(testDir, ['^lib/old_\\d+\\.rb$']);
+
+      const findings = (await run()).findings;
+      expect(findings.map((f) => [f.pattern, f.type, f.reason])).toEqual([
+        ['^lib/old_\\d+\\.rb$', 'regex', 'no_matches']
+      ]);
+    });
+  });
 });

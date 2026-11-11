@@ -18,7 +18,7 @@ export interface GlobMatchOptions {
 /** Check if any files match a glob pattern */
 export function globMatches(
   pattern: string,
-  files: string[],
+  files: Iterable<string>,
   options: GlobMatchOptions = {}
 ): string[] {
   const { dot = true, anchored = false, literalBang = false } = options;
@@ -42,7 +42,13 @@ export function globMatches(
       basename: !anchored && !normalizedPattern.includes('/'),
       nonegate: literalBang
     });
-    return files.filter((file) => isMatch(file));
+    const matches: string[] = [];
+    for (const file of files) {
+      if (isMatch(file)) {
+        matches.push(file);
+      }
+    }
+    return matches;
   } catch {
     // Invalid pattern
     return [];
