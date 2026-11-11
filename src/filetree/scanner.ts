@@ -41,8 +41,11 @@ const DEFAULT_IGNORE_DIRECTORIES = new Set([
   'vendor'
 ]);
 
-/** Default ignore patterns */
-const DEFAULT_IGNORE = [...DEFAULT_IGNORE_DIRECTORIES].map((dir) => `**/${dir}/**`);
+/** Default ignore patterns; they skip the contents, so the directories themselves are listed */
+const DEFAULT_IGNORE = [...DEFAULT_IGNORE_DIRECTORIES].flatMap((dir) => [
+  `**/${dir}/*`,
+  `**/${dir}/*/**`
+]);
 
 /** Files and directory symlinks among fast-glob entries */
 export interface ClassifiedEntries {
@@ -84,6 +87,19 @@ export async function classifyEntries(
   return { files, directorySymlinks };
 }
 
+/** Add a directory and all its parent directories */
+function addWithParents(directories: Set<string>, dir: string): void {
+  if (dir === '.') {
+    return;
+  }
+  const parts = dir.split('/');
+  let current = '';
+  for (const part of parts) {
+    current = current ? `${current}/${part}` : part;
+    directories.add(current);
+  }
+}
+
 /** Scan a directory and build a file tree */
 export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
   const { paths, ignore = [], followSymlinks = false } = options;
@@ -103,18 +119,14 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
 
   const { files, directorySymlinks } = await classifyEntries(basePath, entries);
 
-  // Build directory set from file paths
+  // Build directory set from file paths and the skipped directories
   const directories = new Set<string>();
   for (const file of files) {
-    const dir = path.dirname(file);
-    if (dir !== '.') {
-      // Add all parent directories
-      const parts = dir.split('/');
-      let current = '';
-      for (const part of parts) {
-        current = current ? `${current}/${part}` : part;
-        directories.add(current);
-      }
+    addWithParents(directories, path.dirname(file));
+  }
+  for (const entry of entries) {
+    if (entry.dirent.isDirectory() && DEFAULT_IGNORE_DIRECTORIES.has(entry.name)) {
+      addWithParents(directories, entry.path);
     }
   }
 

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Count an any-depth ignore-file name as present when it matches only a nested default-ignored directory (e.g. `node_modules` with only `pkg/node_modules`)
+
 ## [0.5.0] - 2026-11-10
 
 ### Added
