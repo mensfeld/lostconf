@@ -2,52 +2,10 @@
  * Parser for Prettier ignore files
  */
 
-import type { Pattern } from '../core/types.js';
-import { PatternType } from '../core/types.js';
-import type { Parser } from '../plugin/types.js';
-import { isGlobPattern } from '../validator/glob.js';
+import { createIgnoreParser } from './gitignore.js';
 
-/** Parse .prettierignore file (same format as .gitignore) */
-function parsePrettierIgnore(_filename: string, content: string): Pattern[] {
-  const patterns: Pattern[] = [];
-  const lines = content.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNum = i + 1;
-
-    // Skip empty lines and comments
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue;
-    }
-
-    // Check for negation
-    let patternValue = trimmed;
-    let negated = false;
-    if (patternValue.startsWith('!')) {
-      negated = true;
-      patternValue = patternValue.slice(1);
-    }
-
-    // Determine pattern type
-    const type = isGlobPattern(patternValue) ? PatternType.GLOB : PatternType.PATH;
-
-    patterns.push({
-      value: patternValue,
-      type,
-      line: lineNum,
-      column: 1,
-      negated
-    });
-  }
-
-  return patterns;
-}
-
-/** Prettier ignore file parser */
-export const prettierIgnoreParser: Parser = {
-  name: 'prettierignore',
-  filePatterns: ['.prettierignore', '**/.prettierignore'],
-  parse: parsePrettierIgnore
-};
+/** Prettier ignore file parser (same format as .gitignore) */
+export const prettierIgnoreParser = createIgnoreParser('prettierignore', [
+  '.prettierignore',
+  '**/.prettierignore'
+]);
