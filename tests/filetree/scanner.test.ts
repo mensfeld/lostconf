@@ -27,5 +27,13 @@ describe('scanFileTree', () => {
     it('should not list the contents of an ignored directory', () => {
       expect(tree.files.size).toBe(0);
     });
+
+    it('should scan a base path that has an ignored directory name', async () => {
+      const subtree = await scanFileTree({
+        paths: [path.join(tree.basePath, 'pkg', 'node_modules')]
+      });
+
+      expect([...subtree.files].sort()).toEqual(['b.js', 'x/a.js']);
+    });
   });
 });
