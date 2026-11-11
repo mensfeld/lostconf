@@ -30,7 +30,6 @@ export function validatePattern(
   }
 
   const { configBasePath } = options;
-  const files = Array.from(tree.files);
 
   if (pattern.anyDepth && pattern.type === PatternType.PATH) {
     return validateAnyDepthPathPattern(pattern.value, tree, configBasePath);
@@ -52,21 +51,21 @@ export function validatePattern(
         return { valid: true };
       }
       if (!pattern.matchDirectories) {
-        return validateGlobPattern(resolvedPattern, files, globOptions);
+        return validateGlobPattern(resolvedPattern, tree.files, globOptions);
       }
       const directoryOnly = resolvedPattern.endsWith('/');
       const globPattern = resolvedPattern.replace(/\/+$/, '');
       if (!directoryOnly) {
-        const result = validateGlobPattern(globPattern, files, globOptions);
+        const result = validateGlobPattern(globPattern, tree.files, globOptions);
         if (result.reason !== 'no_matches') {
           return result;
         }
       }
-      return validateGlobPattern(globPattern, Array.from(tree.directories), globOptions);
+      return validateGlobPattern(globPattern, tree.directories, globOptions);
     }
 
     case PatternType.REGEX:
-      return validateRegexPattern(resolvedPattern, files);
+      return validateRegexPattern(resolvedPattern, tree.files);
 
     default:
       return { valid: true };
@@ -128,7 +127,7 @@ function validatePathPattern(
 /** Validate a glob pattern */
 function validateGlobPattern(
   patternValue: string,
-  files: string[],
+  files: Iterable<string>,
   globOptions: GlobMatchOptions = {}
 ): { valid: boolean; reason?: StaleReason } {
   if (!isValidGlob(patternValue)) {
@@ -145,7 +144,7 @@ function validateGlobPattern(
 /** Validate a regex pattern */
 function validateRegexPattern(
   patternValue: string,
-  files: string[]
+  files: Iterable<string>
 ): { valid: boolean; reason?: StaleReason } {
   if (!isValidRegex(patternValue)) {
     return { valid: false, reason: 'invalid_pattern' };

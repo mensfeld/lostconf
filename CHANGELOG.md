@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Match glob and regex patterns against the scanned file set without copying it for every pattern
+
 ## [0.5.0] - 2026-11-10
 
 ### Added
