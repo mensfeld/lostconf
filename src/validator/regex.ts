@@ -3,10 +3,16 @@
  */
 
 /** Check if any files match a regex pattern */
-export function regexMatches(pattern: string, files: string[]): string[] {
+export function regexMatches(pattern: string, files: Iterable<string>): string[] {
   try {
     const regex = new RegExp(pattern);
-    return files.filter((file) => regex.test(file));
+    const matches: string[] = [];
+    for (const file of files) {
+      if (regex.test(file)) {
+        matches.push(file);
+      }
+    }
+    return matches;
   } catch {
     // Invalid regex
     return [];
