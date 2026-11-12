@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Match glob and regex patterns against the scanned file set without copying it for every pattern
 ### Fixed
 - `.prettierignore` and `.eslintignore` now use the gitignore rules of the other ignore files: a pattern with no `/` other than a trailing one matches at any depth, globs also match directories, a leading `/` anchors the pattern and the escapes `\#`, `\!` and a trailing `\ ` are unescaped
+- Count an any-depth ignore-file name as present when it matches only a nested default-ignored directory (e.g. `node_modules` with only `pkg/node_modules`)
 
 ## [0.5.0] - 2026-11-10
 

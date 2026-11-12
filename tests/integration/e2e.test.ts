@@ -566,6 +566,27 @@ src/**/*.tmp`
       expect(findings.map((f) => `${f.file}:${f.pattern}`)).toEqual(['.rubocop.yml:vendor/**/*']);
     });
 
+    it('should treat an any-depth name that matches only a nested ignored directory as present', async () => {
+      await fs.mkdir(path.join(testDir, 'pkg', 'node_modules'), { recursive: true });
+      await fs.writeFile(path.join(testDir, '.gitignore'), 'node_modules\nnode_modules/\n');
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should report a directory-only ignored name that matches only a file', async () => {
+      await touch('pkg/node_modules');
+      await fs.writeFile(path.join(testDir, '.gitignore'), 'node_modules/\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['node_modules/']);
+    });
+
+    it('should report an any-depth ignored directory name that matches nothing', async () => {
+      await touch('pkg/index.js');
+      await fs.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
+
+      expect((await run()).findings.map((f) => f.pattern)).toEqual(['node_modules']);
+    });
+
     it('should not change a glob whose static base is above an ignored directory', async () => {
       await touch('.venv/lib/a.py');
       await writeRubocop(testDir, ['"**/*.py"']);

@@ -26,7 +26,7 @@ export interface FileTree {
   basePath: string;
 }
 
-/** Directory names left out of the scan at any depth */
+/** Directory names whose contents the scan does not read, at any depth */
 const DEFAULT_IGNORE_DIRECTORIES = new Set([
   'node_modules',
   '.git',
@@ -41,8 +41,24 @@ const DEFAULT_IGNORE_DIRECTORIES = new Set([
   'vendor'
 ]);
 
-/** Default ignore patterns */
-const DEFAULT_IGNORE = [...DEFAULT_IGNORE_DIRECTORIES].map((dir) => `**/${dir}/**`);
+/** Callback of fs.readdir */
+type ReaddirCallback = (error: NodeJS.ErrnoException | null, entries: unknown[]) => void;
+
+/**
+ * fs.readdir that reads default-ignored directories below the base path as empty.
+ * Ignore patterns would also drop the directory entries, so the scan lists them
+ * without reading their contents.
+ */
+function skipIgnoredReaddir(basePath: string): typeof fs.readdir {
+  const readdir = (directory: string, ...args: unknown[]): void => {
+    if (directory !== basePath && DEFAULT_IGNORE_DIRECTORIES.has(path.basename(directory))) {
+      process.nextTick(args[args.length - 1] as ReaddirCallback, null, []);
+      return;
+    }
+    (fs.readdir as (...readdirArgs: unknown[]) => void)(directory, ...args);
+  };
+  return readdir as typeof fs.readdir;
+}
 
 /** Files and directory symlinks among fast-glob entries */
 export interface ClassifiedEntries {
@@ -84,12 +100,23 @@ export async function classifyEntries(
   return { files, directorySymlinks };
 }
 
+/** Add a directory and all its parent directories */
+function addWithParents(directories: Set<string>, dir: string): void {
+  if (dir === '.') {
+    return;
+  }
+  const parts = dir.split('/');
+  let current = '';
+  for (const part of parts) {
+    current = current ? `${current}/${part}` : part;
+    directories.add(current);
+  }
+}
+
 /** Scan a directory and build a file tree */
 export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
   const { paths, ignore = [], followSymlinks = false } = options;
   const basePath = paths.length === 1 ? path.resolve(paths[0]) : process.cwd();
-
-  const allIgnore = [...DEFAULT_IGNORE, ...ignore];
 
   // Scan for all entries; symlinks are listed but not followed unless requested
   const entries = await fg('**/*', {
@@ -97,25 +124,32 @@ export async function scanFileTree(options: ScanOptions): Promise<FileTree> {
     dot: true,
     onlyFiles: false,
     objectMode: true,
-    ignore: allIgnore,
-    followSymbolicLinks: followSymlinks
+    ignore,
+    followSymbolicLinks: followSymlinks,
+    fs: { readdir: skipIgnoredReaddir(basePath) }
   });
 
-  const { files, directorySymlinks } = await classifyEntries(basePath, entries);
+  // Default-ignored names count as directories only; other entries with those names stay out
+  const ignoredDirectories: string[] = [];
+  const otherEntries = entries.filter((entry) => {
+    if (!DEFAULT_IGNORE_DIRECTORIES.has(entry.name)) {
+      return true;
+    }
+    if (entry.dirent.isDirectory()) {
+      ignoredDirectories.push(entry.path);
+    }
+    return false;
+  });
 
-  // Build directory set from file paths
+  const { files, directorySymlinks } = await classifyEntries(basePath, otherEntries);
+
+  // Build directory set from file paths and the default-ignored directories
   const directories = new Set<string>();
   for (const file of files) {
-    const dir = path.dirname(file);
-    if (dir !== '.') {
-      // Add all parent directories
-      const parts = dir.split('/');
-      let current = '';
-      for (const part of parts) {
-        current = current ? `${current}/${part}` : part;
-        directories.add(current);
-      }
-    }
+    addWithParents(directories, path.dirname(file));
+  }
+  for (const dir of ignoredDirectories) {
+    addWithParents(directories, dir);
   }
 
   for (const link of directorySymlinks) {
