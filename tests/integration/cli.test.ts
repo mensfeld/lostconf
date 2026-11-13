@@ -179,6 +179,25 @@ describe('CLI Integration Tests', () => {
     expect(stderr).toContain('Discovering config files');
   });
 
+  it('should show progress on stderr by default', async () => {
+    await fs.writeFile(path.join(testDir, '.gitignore'), '*.log');
+    await fs.writeFile(path.join(testDir, 'test.log'), 'content');
+
+    const { stderr } = await execAsync(`node ${cliPath} ${testDir}`);
+
+    expect(stderr).toContain('Scanning file tree...');
+  });
+
+  it('should disable progress with --no-progress', async () => {
+    await fs.writeFile(path.join(testDir, '.gitignore'), '*.log');
+    await fs.writeFile(path.join(testDir, 'test.log'), 'content');
+
+    const { stdout, stderr } = await execAsync(`node ${cliPath} ${testDir} --no-progress`);
+
+    expect(stdout).toContain('No stale patterns found');
+    expect(stderr).toBe('');
+  });
+
   it('should skip ignore files with --skip-ignore-files', async () => {
     await fs.writeFile(path.join(testDir, '.gitignore'), 'stale-git');
     await fs.writeFile(path.join(testDir, '.prettierignore'), 'stale-prettier');
