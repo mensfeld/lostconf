@@ -54,7 +54,7 @@ const options = {
   'fail-on-stale': { type: 'boolean' as const, default: false },
   quiet: { type: 'boolean' as const, short: 'q', default: false },
   verbose: { type: 'boolean' as const, short: 'v', default: false },
-  progress: { type: 'boolean' as const, default: true }
+  'no-progress': { type: 'boolean' as const, default: false }
 };
 
 let values: Record<string, unknown>;
@@ -106,7 +106,7 @@ const cliOptions: CliOptions = {
   failOnStale: values['fail-on-stale'] as boolean | undefined,
   quiet: values.quiet as boolean | undefined,
   verbose: values.verbose as boolean | undefined,
-  progress: values.progress as boolean | undefined
+  progress: !values['no-progress']
 };
 
 try {
