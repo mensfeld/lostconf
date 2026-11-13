@@ -26,7 +26,7 @@ export interface FileTree {
   basePath: string;
 }
 
-/** Directory names left out of the scan at any depth */
+/** Directory names whose contents the scan does not read, at any depth */
 const DEFAULT_IGNORE_DIRECTORIES = new Set([
   'node_modules',
   '.git',

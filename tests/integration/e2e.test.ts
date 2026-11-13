@@ -415,6 +415,17 @@ src/**/*.tmp`
       expect((await run()).findings.map((f) => f.pattern)).toEqual(['MISSING.md', '!*.md']);
     });
 
+    it.each(['.prettierignore', '.eslintignore'])(
+      'should match %s names at any depth and globs against directories',
+      async (file) => {
+        await touch('docs/NOTES.md');
+        await touch('spec/fixtures/a.md');
+        await fs.writeFile(path.join(testDir, file), 'NOTES.md\n**/fixtures\nMISSING.md\n');
+
+        expect((await run()).findings.map((f) => f.pattern)).toEqual(['MISSING.md']);
+      }
+    );
+
     it('should not match directories for other parsers', async () => {
       await touch('spec/unit/a_spec.rb');
       await fs.writeFile(
@@ -622,6 +633,25 @@ src/**/*.tmp`
       await writeRubocop(testDir, ['"**/*.py"']);
 
       expect((await run()).findings.map((f) => f.pattern)).toEqual(['**/*.py']);
+    });
+  });
+
+  describe('regex patterns', () => {
+    it('should treat a regex that matches a file as valid', async () => {
+      await touch('lib/old_1.rb');
+      await writeRubocop(testDir, ['^lib/old_\\d+\\.rb$']);
+
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should report a regex that matches no file', async () => {
+      await touch('lib/new.rb');
+      await writeRubocop(testDir, ['^lib/old_\\d+\\.rb$']);
+
+      const findings = (await run()).findings;
+      expect(findings.map((f) => [f.pattern, f.type, f.reason])).toEqual([
+        ['^lib/old_\\d+\\.rb$', 'regex', 'no_matches']
+      ]);
     });
   });
 });
