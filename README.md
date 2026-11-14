@@ -225,7 +225,7 @@ lostconf extracts and validates three types of patterns from configuration files
 lostconf checks each pattern against a scan of the files on disk. What the scan leaves out decides whether a reference is reported:
 
 - **Default-ignored directories**: the scan lists `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, `__pycache__`, `.venv`, `venv`, `.tox` and `vendor` at any depth (e.g. `pkg/node_modules`), but does not read inside them.
-  - A path inside one (`vendor/gems/x.rb`), or a glob whose part before the first glob character is inside one (`.venv/lib/**/*.py`), counts as present when that directory exists, with no deeper check. When the directory does not exist, the reference is stale.
+  - A path inside one (`vendor/gems/x.rb`), or a glob whose part before the first glob character is such a directory or inside one (`vendor/**`, `.venv/lib/**/*.py`), counts as present when that directory exists, with no deeper check. When the directory does not exist, the reference is stale.
   - A glob that starts above such a directory (`**/*.py`) does not match files inside it.
 - **Symlinks**: the scan does not follow directory symlinks. A symlink to a file counts as a file and a symlink to a directory counts as a directory. An exact path below a directory symlink (`link/sub/a.js`) is checked on disk, but a glob (`link/**/*.js`) does not match files behind it. A broken symlink counts as missing.
 - **Config discovery** does not follow directory symlinks either: a config file reachable only through one is not checked.
@@ -236,12 +236,12 @@ lostconf checks each pattern against a scan of the files on disk. What the scan 
   - Globs also match directories (`**/fixtures`, `spec/*`).
   - A leading `\#` or `\!` is a literal `#` or `!`, and a trailing `\ ` keeps the space.
   - In `.dockerignore`, every pattern matches from the `.dockerignore` file's directory only, as Docker matches from the build context root: `*.log` does not match `a/x.log`.
-- **Negated patterns** (`!pattern`) are not checked.
+- **Negated patterns** (`!pattern`) in ignore files are not checked. In other config files, the leading `!` is dropped and the rest is checked as a glob.
 
 ### What Causes a Stale Pattern?
 
 1. **File Not Found** - A specific file or directory path doesn't exist
-2. **No Matches** - A glob or regex pattern doesn't match anything the scan sees
+2. **No Matches** - A glob or regex pattern doesn't match any scanned file (globs in the ignore files named under **What the Scan Sees** also match directories)
 3. **Invalid Pattern** - The pattern syntax is malformed
 
 ## CLI Reference
@@ -439,7 +439,7 @@ lostconf understands three types of patterns:
 | Reason | Description |
 |--------|-------------|
 | `file_not_found` | The referenced file or directory doesn't exist |
-| `no_matches` | The glob/regex pattern doesn't match anything the scan sees |
+| `no_matches` | The glob/regex pattern doesn't match any scanned file (see [What Causes a Stale Pattern?](#what-causes-a-stale-pattern) for directories) |
 | `invalid_pattern` | The pattern syntax is invalid |
 
 ## Contributing
