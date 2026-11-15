@@ -233,7 +233,7 @@ lostconf checks each pattern against a scan of the files on disk. What the scan 
 
 **Ignore-File Rules**
 
-`.gitignore`, `.dockerignore`, `.eslintignore`, `.prettierignore`, `.remarkignore`, `.lycheeignore`, `.secretlintignore`, `.vscodeignore` and `.ignoresecrets` follow the gitignore rules:
+`.gitignore`, `.dockerignore`, `.eslintignore`, `.prettierignore`, `.stylelintignore`, `.alexignore`, `.markdownlintignore`, `.remarkignore`, `.lycheeignore`, `.secretlintignore`, `.vscodeignore` and `.ignoresecrets` follow the gitignore rules:
 
 - A leading `/` anchors the pattern to the ignore file's directory.
 - A pattern with no `/` other than a trailing one (`NOTES.md`, `*.log`, `logs/`) matches at any depth below the ignore file's directory.
