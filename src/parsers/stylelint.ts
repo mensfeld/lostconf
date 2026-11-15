@@ -6,41 +6,7 @@ import type { Pattern } from '../core/types.js';
 import { PatternType } from '../core/types.js';
 import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
-
-/** Parse .stylelintignore file (same format as .gitignore) */
-function parseStylelintIgnore(_filename: string, content: string): Pattern[] {
-  const patterns: Pattern[] = [];
-  const lines = content.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNum = i + 1;
-
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue;
-    }
-
-    let patternValue = trimmed;
-    let negated = false;
-    if (patternValue.startsWith('!')) {
-      negated = true;
-      patternValue = patternValue.slice(1);
-    }
-
-    const type = isGlobPattern(patternValue) ? PatternType.GLOB : PatternType.PATH;
-
-    patterns.push({
-      value: patternValue,
-      type,
-      line: lineNum,
-      column: 1,
-      negated
-    });
-  }
-
-  return patterns;
-}
+import { createIgnoreParser } from './gitignore.js';
 
 /** Parse .stylelintrc.json and extract ignoreFiles patterns */
 function parseStylelintRc(_filename: string, content: string): Pattern[] {
@@ -101,12 +67,11 @@ function buildLineMap(content: string): Map<string, { line: number; column?: num
   return map;
 }
 
-/** Stylelint ignore parser */
-export const stylelintIgnoreParser: Parser = {
-  name: 'stylelintignore',
-  filePatterns: ['.stylelintignore', '**/.stylelintignore'],
-  parse: parseStylelintIgnore
-};
+/** Stylelint ignore parser (same format as .gitignore) */
+export const stylelintIgnoreParser = createIgnoreParser('stylelintignore', [
+  '.stylelintignore',
+  '**/.stylelintignore'
+]);
 
 /** Stylelint RC parser */
 export const stylelintRcParser: Parser = {
