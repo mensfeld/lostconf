@@ -239,4 +239,51 @@ describe('CLI Integration Tests', () => {
     const resultWith = JSON.parse(withSkip);
     expect(resultWith.findings).toHaveLength(0);
   });
+
+  describe('output order', () => {
+    beforeEach(async () => {
+      // Enough config files for discovery to finish in a different order between runs
+      for (let i = 1; i <= 40; i++) {
+        const dir = path.join(testDir, `pkg${i}`, 'sub');
+        await fs.mkdir(dir, { recursive: true });
+        await fs.writeFile(
+          path.join(testDir, `pkg${i}`, '.gitignore'),
+          `z-stale-${i}\na-stale-${i}`
+        );
+        await fs.writeFile(path.join(dir, '.prettierignore'), `stale-${i}`);
+      }
+    });
+
+    for (const format of ['text', 'json', 'sarif']) {
+      it(`should print byte-identical ${format} output on repeated runs`, async () => {
+        const command = `node ${cliPath} ${testDir} --format ${format} --show-all --no-progress`;
+
+        const { stdout: first } = await execAsync(command);
+        const { stdout: second } = await execAsync(command);
+
+        expect(first).toContain('stale-40');
+        expect(second).toBe(first);
+      });
+    }
+
+    it('should sort findings by file and line', async () => {
+      const { stdout } = await execAsync(
+        `node ${cliPath} ${testDir} --format json --show-all --no-progress`
+      );
+
+      const findings: { file: string; line: number }[] = JSON.parse(stdout).findings;
+      const keys = findings.map((f) => `${f.file}:${f.line}`);
+      expect(findings).toHaveLength(120);
+      expect(keys.slice(0, 3)).toEqual([
+        'pkg1/.gitignore:1',
+        'pkg1/.gitignore:2',
+        'pkg1/sub/.prettierignore:1'
+      ]);
+      expect(keys).toEqual(
+        [...findings]
+          .sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line))
+          .map((f) => `${f.file}:${f.line}`)
+      );
+    });
+  });
 });
