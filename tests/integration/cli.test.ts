@@ -26,14 +26,14 @@ describe('CLI Integration Tests', () => {
     await fs.rm(testDir, { recursive: true, force: true });
   });
 
-  async function findingKeys(): Promise<string[]> {
+  const findingKeys = async (): Promise<string[]> => {
     const { stdout } = await execAsync(
       `node ${cliPath} ${testDir} --format json --show-all --no-progress`
     );
     const findings: { file: string; line: number; column?: number; pattern: string }[] =
       JSON.parse(stdout).findings;
     return findings.map((f) => `${f.file}:${f.line}:${f.column ?? ''}:${f.pattern}`);
-  }
+  };
 
   it('should run successfully with --help', async () => {
     const { stdout, stderr } = await execAsync(`node ${cliPath} --help`);
@@ -276,22 +276,18 @@ describe('CLI Integration Tests', () => {
     }
 
     it('should sort findings by file and line', async () => {
-      const { stdout } = await execAsync(
-        `node ${cliPath} ${testDir} --format json --show-all --no-progress`
-      );
-
-      const findings: { file: string; line: number }[] = JSON.parse(stdout).findings;
-      const keys = findings.map((f) => `${f.file}:${f.line}`);
-      expect(findings).toHaveLength(120);
+      const keys = await findingKeys();
+      expect(keys).toHaveLength(120);
       expect(keys.slice(0, 3)).toEqual([
-        'pkg1/.gitignore:1',
-        'pkg1/.gitignore:2',
-        'pkg1/sub/.prettierignore:1'
+        'pkg1/.gitignore:1:1:z-stale-1',
+        'pkg1/.gitignore:2:1:a-stale-1',
+        'pkg1/sub/.prettierignore:1:1:stale-1'
       ]);
-      expect(keys).toEqual(
-        [...findings]
-          .sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line))
-          .map((f) => `${f.file}:${f.line}`)
+      const fileLines = keys.map((k) => k.split(':').slice(0, 2));
+      expect(fileLines).toEqual(
+        [...fileLines].sort(([fa, la], [fb, lb]) =>
+          fa < fb ? -1 : fa > fb ? 1 : Number(la) - Number(lb)
+        )
       );
     });
   });
