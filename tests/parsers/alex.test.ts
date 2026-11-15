@@ -63,6 +63,14 @@ docs/
     expect(patterns[0].value).toBe('*.md');
     expect(patterns[1].value).toBe('docs/');
   });
+
+  it('should match names at any depth and globs against directories', () => {
+    const patterns = alexIgnoreParser.parse('.alexignore', 'NOTES.md\n/dist\n**/fixtures\n');
+
+    expect(patterns.map((p) => p.anyDepth === true)).toEqual([true, false, false]);
+    expect(patterns[1]).toMatchObject({ value: 'dist', anchored: true });
+    expect(patterns.every((p) => p.matchDirectories)).toBe(true);
+  });
 });
 
 describe('alexRcParser', () => {

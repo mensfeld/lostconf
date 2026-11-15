@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Count an any-depth ignore-file name as present when it matches only a nested default-ignored directory (e.g. `node_modules` with only `pkg/node_modules`)
 - Count a `.git` file (git worktree or submodule) as present, instead of reporting `.git` references as stale
 - `--no-progress` (listed in `--help`) is accepted again and disables the progress indicator instead of failing with `Unknown option`
+- `.stylelintignore`, `.alexignore` and `.markdownlintignore` now use the gitignore rules of the other ignore files: names with no `/` match at any depth and globs also match directories, instead of being reported as stale
 
 ## [0.5.0] - 2026-11-10
 
