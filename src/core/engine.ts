@@ -30,6 +30,21 @@ export interface Engine {
   run(): Promise<ValidationResult>;
 }
 
+/** Compare strings by code unit, independent of the locale */
+function compareStrings(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/** Order findings by file, line, column and pattern */
+function compareFindings(a: Finding, b: Finding): number {
+  return (
+    compareStrings(a.file, b.file) ||
+    a.line - b.line ||
+    (a.column ?? 0) - (b.column ?? 0) ||
+    compareStrings(a.pattern, b.pattern)
+  );
+}
+
 /** Create the validation engine */
 export function createEngine(parsers: Parser[], options: EngineOptions): Engine {
   const { paths, include, exclude, verbose = false, progress = false } = options;
@@ -107,6 +122,9 @@ export function createEngine(parsers: Parser[], options: EngineOptions): Engine 
         process.stderr.write('\r\x1b[K'); // Clear line
         process.stderr.write(`Processed ${configs.length} config files\n\n`);
       }
+
+      // Config discovery order varies between runs; sort so output is byte-stable
+      allFindings.sort(compareFindings);
 
       return {
         findings: allFindings,

@@ -26,6 +26,15 @@ describe('CLI Integration Tests', () => {
     await fs.rm(testDir, { recursive: true, force: true });
   });
 
+  const findingKeys = async (): Promise<string[]> => {
+    const { stdout } = await execAsync(
+      `node ${cliPath} ${testDir} --format json --show-all --no-progress`
+    );
+    const findings: { file: string; line: number; column?: number; pattern: string }[] =
+      JSON.parse(stdout).findings;
+    return findings.map((f) => `${f.file}:${f.line}:${f.column ?? ''}:${f.pattern}`);
+  };
+
   it('should run successfully with --help', async () => {
     const { stdout, stderr } = await execAsync(`node ${cliPath} --help`);
 
@@ -238,5 +247,80 @@ describe('CLI Integration Tests', () => {
     );
     const resultWith = JSON.parse(withSkip);
     expect(resultWith.findings).toHaveLength(0);
+  });
+
+  describe('output order', () => {
+    beforeEach(async () => {
+      // Enough config files for discovery to finish in a different order between runs
+      for (let i = 1; i <= 40; i++) {
+        const dir = path.join(testDir, `pkg${i}`, 'sub');
+        await fs.mkdir(dir, { recursive: true });
+        await fs.writeFile(
+          path.join(testDir, `pkg${i}`, '.gitignore'),
+          `z-stale-${i}\na-stale-${i}`
+        );
+        await fs.writeFile(path.join(dir, '.prettierignore'), `stale-${i}`);
+      }
+    });
+
+    for (const format of ['text', 'json', 'sarif']) {
+      it(`should print byte-identical ${format} output on repeated runs`, async () => {
+        const command = `node ${cliPath} ${testDir} --format ${format} --show-all --no-progress`;
+
+        const { stdout: first } = await execAsync(command);
+        const { stdout: second } = await execAsync(command);
+
+        expect(first).toContain('stale-40');
+        expect(second).toBe(first);
+      });
+    }
+
+    it('should sort findings by file and line', async () => {
+      const keys = await findingKeys();
+      expect(keys).toHaveLength(120);
+      expect(keys.slice(0, 3)).toEqual([
+        'pkg1/.gitignore:1:1:z-stale-1',
+        'pkg1/.gitignore:2:1:a-stale-1',
+        'pkg1/sub/.prettierignore:1:1:stale-1'
+      ]);
+      const fileLines = keys.map((k) => k.split(':').slice(0, 2));
+      expect(fileLines).toEqual(
+        [...fileLines].sort(([fa, la], [fb, lb]) =>
+          fa < fb ? -1 : fa > fb ? 1 : Number(la) - Number(lb)
+        )
+      );
+    });
+  });
+
+  describe('finding sort keys', () => {
+    it('should sort findings on one line by column', async () => {
+      await fs.writeFile(
+        path.join(testDir, 'tsconfig.json'),
+        '{"exclude": ["zz-stale", "aa-stale"]}'
+      );
+
+      expect(await findingKeys()).toEqual([
+        'tsconfig.json:1:14:zz-stale',
+        'tsconfig.json:1:26:aa-stale'
+      ]);
+    });
+
+    it('should sort findings on one line without a column by pattern', async () => {
+      await fs.writeFile(
+        path.join(testDir, '.rubocop.yml'),
+        'AllCops:\n  Exclude: ["zz/**", "aa/**"]\n'
+      );
+
+      expect(await findingKeys()).toEqual(['.rubocop.yml:1::aa/**', '.rubocop.yml:1::zz/**']);
+    });
+
+    it('should sort files by code unit, not by locale', async () => {
+      for (const dir of ['a', 'B']) {
+        await fs.mkdir(path.join(testDir, dir));
+        await fs.writeFile(path.join(testDir, dir, '.gitignore'), `stale-${dir}`);
+      }
+
+      expect(await findingKeys()).toEqual(['B/.gitignore:1:1:stale-B', 'a/.gitignore:1:1:stale-a']);
+    });
   });
 });
