@@ -26,6 +26,15 @@ describe('CLI Integration Tests', () => {
     await fs.rm(testDir, { recursive: true, force: true });
   });
 
+  async function findingKeys(): Promise<string[]> {
+    const { stdout } = await execAsync(
+      `node ${cliPath} ${testDir} --format json --show-all --no-progress`
+    );
+    const findings: { file: string; line: number; column?: number; pattern: string }[] =
+      JSON.parse(stdout).findings;
+    return findings.map((f) => `${f.file}:${f.line}:${f.column ?? ''}:${f.pattern}`);
+  }
+
   it('should run successfully with --help', async () => {
     const { stdout, stderr } = await execAsync(`node ${cliPath} --help`);
 
@@ -284,6 +293,38 @@ describe('CLI Integration Tests', () => {
           .sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line))
           .map((f) => `${f.file}:${f.line}`)
       );
+    });
+  });
+
+  describe('finding sort keys', () => {
+    it('should sort findings on one line by column', async () => {
+      await fs.writeFile(
+        path.join(testDir, 'tsconfig.json'),
+        '{"exclude": ["zz-stale", "aa-stale"]}'
+      );
+
+      expect(await findingKeys()).toEqual([
+        'tsconfig.json:1:14:zz-stale',
+        'tsconfig.json:1:26:aa-stale'
+      ]);
+    });
+
+    it('should sort findings on one line without a column by pattern', async () => {
+      await fs.writeFile(
+        path.join(testDir, '.rubocop.yml'),
+        'AllCops:\n  Exclude: ["zz/**", "aa/**"]\n'
+      );
+
+      expect(await findingKeys()).toEqual(['.rubocop.yml:1::aa/**', '.rubocop.yml:1::zz/**']);
+    });
+
+    it('should sort files by code unit, not by locale', async () => {
+      for (const dir of ['a', 'B']) {
+        await fs.mkdir(path.join(testDir, dir));
+        await fs.writeFile(path.join(testDir, dir, '.gitignore'), `stale-${dir}`);
+      }
+
+      expect(await findingKeys()).toEqual(['B/.gitignore:1:1:stale-B', 'a/.gitignore:1:1:stale-a']);
     });
   });
 });
