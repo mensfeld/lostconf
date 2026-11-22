@@ -135,7 +135,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | Pylint | `.pylintrc`, `pylintrc` | Ignore paths, ignore patterns in `[MASTER]`/`[MAIN]` section |
 | | Bandit | `.bandit` | Exclude directories, exclude files, test paths |
 | | Pyright | `pyrightconfig.json` | `include`, `exclude`, `ignore`, `extraPaths` patterns |
-| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Exclude patterns, template paths, library paths |
+| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Template paths, library paths |
 | **Ruby** | RuboCop | `.rubocop.yml` | Exclude patterns, Include patterns in AllCops |
 | | Brakeman | `config/brakeman.yml`, `.brakeman.yml` | Patterns in `skip-files` and `only-files` |
 | | Reek | `.reek.yml`, `.reek`, `config.reek` | Directory paths in `exclude_paths` |
