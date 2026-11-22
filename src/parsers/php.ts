@@ -17,9 +17,8 @@ function parsePhpcsConfig(_filename: string, content: string): Pattern[] {
     // <exclude-pattern>...</exclude-pattern>
     /<exclude-pattern[^>]*>([^<]+)<\/exclude-pattern>/gi,
     // <file>...</file>
-    /<file[^>]*>([^<]+)<\/file>/gi,
-    // <exclude name="..." />
-    /<exclude[^>]*\sname\s*=\s*["']([^"']+)["']/gi
+    /<file[^>]*>([^<]+)<\/file>/gi
+    // `<exclude name="..." />` is skipped: it names a sniff code, not a file
   ];
 
   for (let i = 0; i < lines.length; i++) {
