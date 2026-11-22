@@ -155,7 +155,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | clang-format | `.clang-format` | None: `IncludeCategories` holds `#include` regexes and `SortIncludes` a sort mode, not paths |
 | **Scala** | Scalafmt | `.scalafmt.conf` | Project.excludeFilters |
 | | Scalafix | `.scalafix.conf` | Excludes patterns |
-| **Elixir** | Credo | `.credo.exs` | Paths, globs and regexes in `files.included` and `files.excluded` |
+| **Elixir** | Credo | `.credo.exs` | Paths, globs and regexes in `files.included` and `files.excluded`, paths in `requires` |
 | **.NET** | EditorConfig | `.editorconfig` | File globs and patterns |
 | | MSBuild | `Directory.Build.props` | Include/Exclude item patterns |
 | **Shell** | ShellCheck | `.shellcheckrc` | Source-path directives |
@@ -214,7 +214,7 @@ lostconf extracts and validates three types of patterns from configuration files
 - **Swift** (swiftlint): Excluded and included file paths
 - **C/C++** (clang-tidy): Header filter regexes
 - **Scala** (scalafmt, scalafix): Exclude filters
-- **Elixir** (credo): Included and excluded file paths
+- **Elixir** (credo): Included and excluded file paths, required check files
 - **.NET** (editorconfig, MSBuild): File globs and item patterns
 - **ShellCheck**: Source path references
 - **yamllint**: Ignore patterns and ignore-from-file references

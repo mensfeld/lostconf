@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.stylelintignore`, `.alexignore` and `.markdownlintignore` now use the gitignore rules of the other ignore files: a pattern with no `/` other than a trailing one matches at any depth, globs also match directories, a leading `/` anchors the pattern and the escapes `\#`, `\!` and a trailing `\ ` are unescaped
 - Sort findings by file, line, column and pattern, so text, JSON and SARIF output is byte-identical between runs on the same tree
 - Match regex patterns in a config inside a subdirectory against file paths relative to that config's directory or to the scan root, instead of reporting every such regex as stale
-- credo regexes outside `files.included`/`files.excluded` (check params such as `ignore_names`) and clang-format `IncludeCategories` regexes and `SortIncludes` values are no longer checked as file patterns: they match module names, `#include` spellings and sort modes, not files
+- credo values outside `files.included`/`files.excluded` and `requires` (e.g. check params such as `ignore_names`) and clang-format `IncludeCategories` regexes and `SortIncludes` values are no longer checked as file patterns: they match module names, `#include` spellings and sort modes, not files
 
 ## [0.5.0] - 2026-11-10
 

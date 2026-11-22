@@ -53,10 +53,62 @@ describe('credoParser', () => {
 
   it('should not end the files map at a brace in a string or regex', () => {
     const content = `%{configs: [%{
-  files: %{included: ["}"], excluded: [~r(^}), "legacy/"]}
+  files: %{included: ["}"], excluded: [~r(^}]), "legacy/"]}
 }]}`;
     const patterns = credoParser.parse('.credo.exs', content);
 
     expect(patterns.map((p) => p.value)).toEqual(['}', 'legacy/']);
+  });
+
+  it('should extract requires paths', () => {
+    const content =
+      '%{configs: [%{name: "default", requires: ["./gone/custom_check.ex", "./checks/*.ex"]}]}';
+    const patterns = credoParser.parse('.credo.exs', content);
+
+    expect(patterns.map((p) => [p.value, p.type])).toEqual([
+      ['./gone/custom_check.ex', PatternType.PATH],
+      ['./checks/*.ex', PatternType.GLOB]
+    ]);
+  });
+
+  it('should not end the files map at a brace in a charlist or an escaped quote', () => {
+    const content = `%{configs: [%{
+  files: %{
+    included: ['}'],
+    excluded: ["a\\"}",
+      "legacy/"]
+  }
+}]}`;
+    const patterns = credoParser.parse('.credo.exs', content);
+
+    expect(patterns.map((p) => p.value)).toContain('legacy/');
+  });
+
+  it('should not end the files map at its first list', () => {
+    const content = '%{configs: [%{files: %{included: ["lib/"], excluded: ["legacy/"]}}]}';
+    const patterns = credoParser.parse('.credo.exs', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['lib/', 'legacy/']);
+  });
+
+  it('should ignore a key that only ends in files', () => {
+    const content =
+      '%{configs: [%{checks: [{MyCheck, [extra_files: %{excluded: ["generated/"]}]}]}]}';
+
+    expect(credoParser.parse('.credo.exs', content)).toEqual([]);
+  });
+
+  it('should ignore a value right after the files map on a later line', () => {
+    const content = `%{
+  configs: [
+    %{
+${'      #\n'.repeat(20)}      name: "default",
+      files: %{excluded: ["legacy/"]}, plugins: ["other/"]
+    }
+  ]
+}`;
+    const patterns = credoParser.parse('.credo.exs', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['legacy/']);
   });
 });

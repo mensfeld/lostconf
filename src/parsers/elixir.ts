@@ -11,13 +11,14 @@ import { looksLikeRegex } from '../validator/regex.js';
 const SIGIL_CLOSERS: Record<string, string> = { '{': '}', '[': ']', '(': ')', '<': '>' };
 
 /**
- * Offset ranges of every `files: %{...}` map. Its `included`/`excluded` lists are credo's only
- * file filters; every other `~r` (e.g. a check's `ignore_names`) matches module or other names.
+ * Offset ranges of every `files: %{...}` map and `requires: [...]` list. Only they hold files
+ * (`included`/`excluded` filters, required check sources); every other `~r` (e.g. a check's
+ * `ignore_names`) matches module or other names.
  */
-function findFilesMapRanges(content: string): [number, number][] {
+function findFileKeyRanges(content: string): [number, number][] {
   const ranges: [number, number][] = [];
   const open: { start: number; depth: number }[] = [];
-  const filesKey = /files:\s*%\{/y;
+  const fileKey = /(?:files:\s*%\{|requires:\s*\[)/y;
   let depth = 0;
   let i = 0;
 
@@ -41,17 +42,17 @@ function findFilesMapRanges(content: string): [number, number][] {
       continue;
     }
 
-    filesKey.lastIndex = i;
-    if (!/\w/.test(content[i - 1] ?? '') && filesKey.test(content)) {
+    fileKey.lastIndex = i;
+    if (!/\w/.test(content[i - 1] ?? '') && fileKey.test(content)) {
       open.push({ start: i, depth });
       depth++;
-      i = filesKey.lastIndex;
+      i = fileKey.lastIndex;
       continue;
     }
 
-    if (char === '{') {
+    if (char === '{' || char === '[') {
       depth++;
-    } else if (char === '}') {
+    } else if (char === '}' || char === ']') {
       depth--;
       const current = open[open.length - 1];
       if (current && current.depth === depth) {
@@ -81,12 +82,12 @@ function skipDelimited(content: string, from: number, closer: string): number {
 function parseCredoConfig(_filename: string, content: string): Pattern[] {
   const patterns: Pattern[] = [];
   const lines = content.split('\n');
-  const ranges = findFilesMapRanges(content);
-  const inFilesMap = (offset: number) =>
+  const ranges = findFileKeyRanges(content);
+  const inFileKey = (offset: number) =>
     ranges.some(([start, end]) => offset > start && offset < end);
   let lineStart = 0;
 
-  // files: %{included: ["lib/"], excluded: [~r"/_build/"]}
+  // files: %{included: ["lib/"], excluded: [~r"/_build/"]}, requires: ["./checks/*.ex"]
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -98,7 +99,7 @@ function parseCredoConfig(_filename: string, content: string): Pattern[] {
     const regexMatches = line.matchAll(/~r["/{}]([^"/{}]+)["/{}]/g);
     for (const match of regexMatches) {
       const value = match[1];
-      if (!value || !inFilesMap(offset + (match.index ?? 0))) continue;
+      if (!value || !inFileKey(offset + (match.index ?? 0))) continue;
 
       patterns.push({
         value,
@@ -112,7 +113,7 @@ function parseCredoConfig(_filename: string, content: string): Pattern[] {
     const stringMatches = line.matchAll(/"([^"]+)"/g);
     for (const match of stringMatches) {
       const value = match[1];
-      if (!value || !inFilesMap(offset + (match.index ?? 0))) continue;
+      if (!value || !inFileKey(offset + (match.index ?? 0))) continue;
 
       // Skip if it's part of a config key or looks like a URL
       if (value.includes(':') || value.startsWith('http')) continue;
