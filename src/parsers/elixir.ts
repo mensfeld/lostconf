@@ -8,24 +8,97 @@ import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
 import { looksLikeRegex } from '../validator/regex.js';
 
+const SIGIL_CLOSERS: Record<string, string> = { '{': '}', '[': ']', '(': ')', '<': '>' };
+
+/**
+ * Offset ranges of every `files: %{...}` map. Its `included`/`excluded` lists are credo's only
+ * file filters; every other `~r` (e.g. a check's `ignore_names`) matches module or other names.
+ */
+function findFilesMapRanges(content: string): [number, number][] {
+  const ranges: [number, number][] = [];
+  const open: { start: number; depth: number }[] = [];
+  const filesKey = /files:\s*%\{/y;
+  let depth = 0;
+  let i = 0;
+
+  while (i < content.length) {
+    const char = content[i];
+
+    if (char === '#') {
+      const end = content.indexOf('\n', i);
+      i = end === -1 ? content.length : end;
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      i = skipDelimited(content, i + 1, char);
+      continue;
+    }
+
+    if (char === '~' && /[a-zA-Z]/.test(content[i + 1] ?? '')) {
+      const opener = content[i + 2] ?? '';
+      i = skipDelimited(content, i + 3, SIGIL_CLOSERS[opener] ?? opener);
+      continue;
+    }
+
+    filesKey.lastIndex = i;
+    if (!/\w/.test(content[i - 1] ?? '') && filesKey.test(content)) {
+      open.push({ start: i, depth });
+      depth++;
+      i = filesKey.lastIndex;
+      continue;
+    }
+
+    if (char === '{') {
+      depth++;
+    } else if (char === '}') {
+      depth--;
+      const current = open[open.length - 1];
+      if (current && current.depth === depth) {
+        open.pop();
+        ranges.push([current.start, i]);
+      }
+    }
+    i++;
+  }
+
+  return ranges;
+}
+
+/** Index just past the unescaped `closer` that ends a string or sigil body starting at `from` */
+function skipDelimited(content: string, from: number, closer: string): number {
+  for (let i = from; i < content.length; i++) {
+    if (content[i] === '\\') {
+      i++;
+    } else if (content[i] === closer) {
+      return i + 1;
+    }
+  }
+  return content.length;
+}
+
 /** Parse .credo.exs and extract patterns */
 function parseCredoConfig(_filename: string, content: string): Pattern[] {
   const patterns: Pattern[] = [];
   const lines = content.split('\n');
+  const ranges = findFilesMapRanges(content);
+  const inFilesMap = (offset: number) =>
+    ranges.some(([start, end]) => offset > start && offset < end);
+  let lineStart = 0;
 
-  // Look for included/excluded patterns in Elixir syntax
-  // included: [~r"lib/", ~r"src/"]
-  // excluded: [~r"test/"]
+  // files: %{included: ["lib/"], excluded: [~r"/_build/"]}
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lineNum = i + 1;
+    const offset = lineStart;
+    lineStart += line.length + 1;
 
     // Match Elixir regex patterns ~r"..." or ~r/.../ or ~r{...}
     const regexMatches = line.matchAll(/~r["/{}]([^"/{}]+)["/{}]/g);
     for (const match of regexMatches) {
       const value = match[1];
-      if (!value) continue;
+      if (!value || !inFilesMap(offset + (match.index ?? 0))) continue;
 
       patterns.push({
         value,
@@ -39,7 +112,7 @@ function parseCredoConfig(_filename: string, content: string): Pattern[] {
     const stringMatches = line.matchAll(/"([^"]+)"/g);
     for (const match of stringMatches) {
       const value = match[1];
-      if (!value) continue;
+      if (!value || !inFilesMap(offset + (match.index ?? 0))) continue;
 
       // Skip if it's part of a config key or looks like a URL
       if (value.includes(':') || value.startsWith('http')) continue;

@@ -6,7 +6,6 @@ import { parse as parseYaml } from 'yaml';
 import type { Pattern } from '../core/types.js';
 import { PatternType } from '../core/types.js';
 import type { Parser } from '../plugin/types.js';
-import { isGlobPattern } from '../validator/glob.js';
 import { looksLikeRegex } from '../validator/regex.js';
 
 interface ClangTidyConfig {
@@ -61,35 +60,11 @@ function parseClangTidy(_filename: string, content: string): Pattern[] {
   return patterns;
 }
 
-/** Parse .clang-format - typically doesn't have file patterns, but may have some */
-function parseClangFormat(_filename: string, content: string): Pattern[] {
-  const patterns: Pattern[] = [];
-  const lines = content.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNum = i + 1;
-
-    // Look for file-related directives
-    const match = line.match(/^\s*(?:IncludeCategories|SortIncludes).*["']([^"']+)["']/);
-    if (match) {
-      const value = match[1];
-      const type = isGlobPattern(value)
-        ? PatternType.GLOB
-        : looksLikeRegex(value)
-          ? PatternType.REGEX
-          : PatternType.PATH;
-
-      patterns.push({
-        value,
-        type,
-        line: lineNum,
-        column: line.indexOf(value) + 1
-      });
-    }
-  }
-
-  return patterns;
+/** Parse .clang-format */
+function parseClangFormat(_filename: string, _content: string): Pattern[] {
+  // No key holds a file path: `IncludeCategories` `Regex` matches the `#include` spelling
+  // (e.g. `^<gtest/.*>`) and `SortIncludes` holds a sort mode.
+  return [];
 }
 
 function buildLineMap(content: string): Map<string, { line: number; column?: number }> {
