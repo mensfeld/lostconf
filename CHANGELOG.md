@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.stylelintignore`, `.alexignore` and `.markdownlintignore` now use the gitignore rules of the other ignore files: a pattern with no `/` other than a trailing one matches at any depth, globs also match directories, a leading `/` anchors the pattern and the escapes `\#`, `\!` and a trailing `\ ` are unescaped
 - Sort findings by file, line, column and pattern, so text, JSON and SARIF output is byte-identical between runs on the same tree
 - Match regex patterns in a config inside a subdirectory against file paths relative to that config's directory or to the scan root, instead of reporting every such regex as stale
+- bandit `tests`, bundler-audit `ignore` and hadolint `ignored`/`trustedRegistries` are no longer checked as file paths: they hold test IDs, advisory IDs, rule codes and registry hosts, so realistic values were reported as stale
 
 ## [0.5.0] - 2026-11-10
 
