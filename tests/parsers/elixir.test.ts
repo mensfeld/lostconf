@@ -111,4 +111,23 @@ ${'      #\n'.repeat(20)}      name: "default",
 
     expect(patterns.map((p) => p.value)).toEqual(['legacy/']);
   });
+
+  it('should end the requires list at its closing bracket', () => {
+    const content = `%{configs: [%{
+  requires: ["./checks/custom_check.ex"],
+  checks: %{enabled: [{Credo.Check.Readability.ModuleDoc, [ignore_names: [~r/(\\.\\w+Controller|\\.Repo)$/]]}]}
+}]}`;
+    const patterns = credoParser.parse('.credo.exs', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['./checks/custom_check.ex']);
+  });
+
+  it('should not end the files map at a brace in an uppercase sigil', () => {
+    const content = `%{configs: [%{
+  files: %{excluded: [~S(}]), "legacy/"]}
+}]}`;
+    const patterns = credoParser.parse('.credo.exs', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['legacy/']);
+  });
 });
