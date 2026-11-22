@@ -29,8 +29,9 @@ const PATTERN_WIDTH = 30;
 const MIN_GAP = 2;
 
 /** Spaces that pad `text` to `width`, leaving at least MIN_GAP */
-const padding = (text: string, width: number): string =>
-  ' '.repeat(Math.max(width - text.length, MIN_GAP));
+function getPadding(text: string, width: number): string {
+  return ' '.repeat(Math.max(width - text.length, MIN_GAP));
+}
 
 /** Format reason for display */
 function formatReason(reason: StaleReason): string {
@@ -65,7 +66,7 @@ function formatFinding(finding: Finding): string {
 
   const locationStr = `${finding.file}:${finding.line}`;
 
-  return `${severityIcon} ${location}${padding(locationStr, LOCATION_WIDTH)}${pattern}${padding(finding.pattern, PATTERN_WIDTH)}${reason}`;
+  return `${severityIcon} ${location}${getPadding(locationStr, LOCATION_WIDTH)}${pattern}${getPadding(finding.pattern, PATTERN_WIDTH)}${reason}`;
 }
 
 /** Text formatter */
