@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--no-progress` (listed in `--help`) is accepted again and disables the progress indicator instead of failing with `Unknown option`
 - `.stylelintignore`, `.alexignore` and `.markdownlintignore` now use the gitignore rules of the other ignore files: a pattern with no `/` other than a trailing one matches at any depth, globs also match directories, a leading `/` anchors the pattern and the escapes `\#`, `\!` and a trailing `\ ` are unescaped
 - Sort findings by file, line, column and pattern, so text, JSON and SARIF output is byte-identical between runs on the same tree
+- Config discovery skips the same default-ignored directories as the file scan (`vendor`, `.venv`, `venv`, `.tox`, `coverage`, `.next`, `__pycache__`, ...), so configs inside them (e.g. vendored gems) are no longer checked
 
 ## [0.5.0] - 2026-11-10
 

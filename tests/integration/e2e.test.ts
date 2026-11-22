@@ -36,6 +36,9 @@ describe('End-to-End Integration Tests', () => {
     return engine.run();
   };
 
+  const configPaths = async () =>
+    (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);
+
   const touch = async (file: string) => {
     await fs.mkdir(path.dirname(path.join(testDir, file)), { recursive: true });
     await fs.writeFile(path.join(testDir, file), '');
@@ -441,9 +444,6 @@ src/**/*.tmp`
   });
 
   describe('symlinks', () => {
-    const configPaths = async () =>
-      (await discoverConfigs(getBuiltinParsers(), { paths: [testDir] })).map((c) => c.path);
-
     it('should treat a symlink to a file as present', async () => {
       await fs.writeFile(path.join(testDir, 'real.rb'), '');
       await fs.symlink('real.rb', path.join(testDir, 'link.rb'));
@@ -636,6 +636,28 @@ src/**/*.tmp`
       await writeRubocop(testDir, ['"**/*.py"']);
 
       expect((await run()).findings.map((f) => f.pattern)).toEqual(['**/*.py']);
+    });
+
+    it('should not check configs inside a vendored bundle', async () => {
+      const gem = path.join(testDir, 'vendor/bundle/ruby/3.4.0/gems/x');
+      await fs.mkdir(gem, { recursive: true });
+      await fs.writeFile(
+        path.join(gem, '.pre-commit-config.yaml'),
+        'repos:\n  - repo: local\n    hooks:\n      - id: x\n        exclude: ^docs/\n'
+      );
+      await writeRubocop(gem, ['/home/ci/fake/**/*']);
+
+      expect(await configPaths()).toEqual([]);
+      expect((await run()).findings).toHaveLength(0);
+    });
+
+    it('should not check configs inside a virtualenv', async () => {
+      const pkg = path.join(testDir, '.venv/lib/python3.12/site-packages/x');
+      await fs.mkdir(pkg, { recursive: true });
+      await writeRubocop(pkg, ['/home/ci/fake/**/*']);
+
+      expect(await configPaths()).toEqual([]);
+      expect((await run()).findings).toHaveLength(0);
     });
   });
 
