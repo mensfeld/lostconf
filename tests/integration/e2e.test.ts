@@ -659,6 +659,18 @@ src/**/*.tmp`
       expect(await configPaths()).toEqual([]);
       expect((await run()).findings).toHaveLength(0);
     });
+
+    it('should not check configs inside nested ignored directories', async () => {
+      const gem = path.join(testDir, 'packages/app/vendor/bundle/ruby/3.4.0/gems/x');
+      const pkg = path.join(testDir, 'svc/.venv/lib/python3.12/site-packages/x');
+      await fs.mkdir(gem, { recursive: true });
+      await fs.mkdir(pkg, { recursive: true });
+      await writeRubocop(gem, ['/home/ci/fake/**/*']);
+      await writeRubocop(pkg, ['/home/ci/fake/**/*']);
+
+      expect(await configPaths()).toEqual([]);
+      expect((await run()).findings).toHaveLength(0);
+    });
   });
 
   describe('regex patterns', () => {
