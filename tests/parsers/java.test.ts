@@ -20,6 +20,19 @@ describe('Checkstyle Parser', () => {
 });
 
 describe('PMD Parser', () => {
+  it('should parse file and path attributes', () => {
+    const content = `<ruleset name="app">
+  <rule ref="category/java/bestpractices.xml" file="src/A.java"/>
+  <rule ref="category/java/design.xml" path="src/main/java"/>
+</ruleset>`;
+
+    const patterns = pmdParser.parse('pmd.xml', content);
+
+    expect(patterns).toHaveLength(2);
+    expect(patterns[0]).toMatchObject({ value: 'src/A.java', type: PatternType.PATH, line: 2 });
+    expect(patterns[1]).toMatchObject({ value: 'src/main/java', type: PatternType.PATH, line: 3 });
+  });
+
   it('should not extract rule names from exclude name', () => {
     const content = `<ruleset name="app">
   <rule ref="category/java/bestpractices.xml">
