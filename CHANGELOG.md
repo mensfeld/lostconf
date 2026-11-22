@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.stylelintignore`, `.alexignore` and `.markdownlintignore` now use the gitignore rules of the other ignore files: a pattern with no `/` other than a trailing one matches at any depth, globs also match directories, a leading `/` anchors the pattern and the escapes `\#`, `\!` and a trailing `\ ` are unescaped
 - Sort findings by file, line, column and pattern, so text, JSON and SARIF output is byte-identical between runs on the same tree
 - Match regex patterns in a config inside a subdirectory against file paths relative to that config's directory or to the scan root, instead of reporting every such regex as stale
+- commitlint `ignores`, gitleaks `allowlist.regexes`, pytest `python_classes`/`python_functions` and coverage `exclude_lines` are no longer checked as file patterns: they match commit messages, secrets, test names and source lines, so every value was reported as stale
 
 ## [0.5.0] - 2026-11-10
 

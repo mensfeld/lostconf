@@ -128,7 +128,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | Biome | `biome.json`, `biome.jsonc` | Patterns in `files.ignore`, `linter.ignore`, `formatter.ignore` |
 | | Deno | `deno.json`, `deno.jsonc` | Global `exclude`, `lint.exclude/include`, `fmt.exclude/include`, `test.exclude/include` |
 | | Oxlint | `.oxlintrc.json`, `oxlint.config.json` | Patterns in `ignorePatterns` array |
-| | commitlint | `.commitlintrc`, `.commitlintrc.json` | Commit message patterns in `ignores`, file paths in `extends` |
+| | commitlint | `.commitlintrc`, `.commitlintrc.json` | File paths in `extends` |
 | | lint-staged | `.lintstagedrc`, `.lintstagedrc.json` | Object keys are glob patterns matching staged files |
 | **Python** | pytest, coverage, mypy, ruff, black, isort | `pyproject.toml` | Test paths, source paths, exclude patterns, omit patterns |
 | | Flake8 | `.flake8`, `setup.cfg` | Exclude patterns, extend-exclude, filename patterns, per-file-ignores |
@@ -162,7 +162,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | **YAML** | yamllint | `.yamllint`, `.yamllint.yml` | Ignore patterns, ignore-from-file paths |
 | **Terraform** | TFLint | `.tflint.hcl` | Source paths, module directories, exclude patterns |
 | **Security** | Semgrep | `.semgrep.yml`, `.semgrep.yaml`, `.semgrepignore` | `paths.exclude`, `paths.include` in rules, ignore patterns |
-| | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, `allowlist.regexes`, rule-specific allowlists |
+| | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, rule-specific allowlists |
 | **Docker** | Hadolint | `.hadolint.yaml`, `.hadolint.yml` | `ignored` patterns, `trustedRegistries` (non-URL paths) |
 | **DevOps** | ansible-lint | `.ansible-lint`, `.ansible-lint.yaml` | Patterns in `exclude_paths` list |
 | **Protocol Buffers** | buf | `buf.yaml`, `buf.work.yaml` | Patterns in `lint.ignore`, `breaking.ignore`, workspace `directories` |
