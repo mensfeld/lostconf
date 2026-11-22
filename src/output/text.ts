@@ -25,7 +25,7 @@ const LOCATION_WIDTH = 25;
 /** Column width of the pattern */
 const PATTERN_WIDTH = 30;
 
-/** Minimum spaces between columns when a value is longer than its column */
+/** Minimum spaces between columns */
 const MIN_GAP = 2;
 
 /** Spaces that pad `text` to `width`, leaving at least MIN_GAP */
