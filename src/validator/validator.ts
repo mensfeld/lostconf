@@ -10,7 +10,7 @@ import { pathExists, existsInIgnoredDirectory } from '../filetree/tree.js';
 import type { FileTree } from '../filetree/tree.js';
 import { globMatches, isValidGlob } from './glob.js';
 import type { GlobMatchOptions } from './glob.js';
-import { regexMatches, isValidRegex } from './regex.js';
+import { isValidRegex } from './regex.js';
 import { classifySeverity } from '../core/severity.js';
 
 export interface ValidatorOptions {
@@ -65,7 +65,8 @@ export function validatePattern(
     }
 
     case PatternType.REGEX:
-      return validateRegexPattern(resolvedPattern, tree.files);
+      // A regex is matched against file paths, so the config dir is never part of its text
+      return validateRegexPattern(pattern.value, tree.files, configBasePath);
 
     default:
       return { valid: true };
@@ -141,18 +142,25 @@ function validateGlobPattern(
   return { valid: false, reason: 'no_matches' };
 }
 
-/** Validate a regex pattern */
+/** Validate a regex pattern against paths relative to the scan root or to the config dir */
 function validateRegexPattern(
   patternValue: string,
-  files: Iterable<string>
+  files: Iterable<string>,
+  configBasePath = '.'
 ): { valid: boolean; reason?: StaleReason } {
   if (!isValidRegex(patternValue)) {
     return { valid: false, reason: 'invalid_pattern' };
   }
 
-  const matches = regexMatches(patternValue, files);
-  if (matches.length > 0) {
-    return { valid: true };
+  const regex = new RegExp(patternValue);
+  const prefix = configBasePath && configBasePath !== '.' ? configBasePath + '/' : undefined;
+  for (const file of files) {
+    if (
+      regex.test(file) ||
+      (prefix && file.startsWith(prefix) && regex.test(file.slice(prefix.length)))
+    ) {
+      return { valid: true };
+    }
   }
   return { valid: false, reason: 'no_matches' };
 }
