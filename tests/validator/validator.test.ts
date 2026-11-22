@@ -200,8 +200,8 @@ describe('validatePattern', () => {
 
   describe('regex patterns in a config inside a subdirectory', () => {
     const tree: FileTree = {
-      files: new Set(['sub/x.pb.rb', 'sub/docs/a.md', 'other/y.txt']),
-      directories: new Set(['sub', 'sub/docs', 'other']),
+      files: new Set(['sub/x.pb.rb', 'sub/docs/a.md', 'other/y.txt', 'abc/docs/b.md']),
+      directories: new Set(['sub', 'sub/docs', 'other', 'abc', 'abc/docs']),
       basePath: '/project'
     };
     const isValid = (value: string) =>
@@ -218,6 +218,10 @@ describe('validatePattern', () => {
 
     it('matches an anchored regex against the path relative to the scan root', () => {
       expect(isValid('^other/')).toBe(true);
+    });
+
+    it('does not match an anchored regex against a file outside the config dir', () => {
+      expect(isValid('^docs/b\\.md$')).toBe(false);
     });
 
     it('reports a regex that matches no file', () => {
