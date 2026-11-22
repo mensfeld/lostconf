@@ -151,7 +151,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | **PHP** | PHP_CodeSniffer | `phpcs.xml` | Exclude-pattern elements |
 | | PHPStan | `phpstan.neon` | Excludes_analyse, ignoreErrors paths |
 | **Swift** | SwiftLint | `.swiftlint.yml` | Excluded paths, included paths |
-| **C/C++** | clang-tidy | `.clang-tidy` | CheckOptions paths |
+| **C/C++** | clang-tidy | `.clang-tidy` | `HeaderFilterRegex`, `ExcludeHeaderFilterRegex` |
 | | clang-format | `.clang-format` | None: `IncludeCategories` holds `#include` regexes and `SortIncludes` a sort mode, not paths |
 | **Scala** | Scalafmt | `.scalafmt.conf` | Project.excludeFilters |
 | | Scalafix | `.scalafix.conf` | Excludes patterns |

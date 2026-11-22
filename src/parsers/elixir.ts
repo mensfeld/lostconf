@@ -8,6 +8,7 @@ import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
 import { looksLikeRegex } from '../validator/regex.js';
 
+/** Closing delimiter of a sigil whose opener is a bracket; any other opener closes itself */
 const SIGIL_CLOSERS: Record<string, string> = { '{': '}', '[': ']', '(': ')', '<': '>' };
 
 /**
@@ -86,8 +87,6 @@ function parseCredoConfig(_filename: string, content: string): Pattern[] {
   const inFileKey = (offset: number) =>
     ranges.some(([start, end]) => offset > start && offset < end);
   let lineStart = 0;
-
-  // files: %{included: ["lib/"], excluded: [~r"/_build/"]}, requires: ["./checks/*.ex"]
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
