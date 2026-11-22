@@ -60,7 +60,9 @@ function parseSqlfluff(_filename: string, content: string): Pattern[] {
 
 /** Check if a key is a path-related field */
 function isPathField(key: string): boolean {
-  return ['ignore', 'ignore_templated_areas', 'template_path', 'library_path'].includes(key);
+  return ['template_path', 'library_path'].includes(key);
+  // Note: ignore contains error categories (parsing, templating), not paths
+  // Note: ignore_templated_areas is a boolean, not a path
   // Note: exclude_rules contains rule IDs (L001, L002), not paths
   // Note: sql_file_exts contains file extensions (.sql, .sql.j2), not paths
 }

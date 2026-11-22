@@ -13,7 +13,6 @@ interface LefthookHook {
   files?: string;
   glob?: string;
   exclude?: string;
-  skip?: string | string[];
   commands?: Record<string, { files?: string; glob?: string; exclude?: string }>;
 }
 
@@ -63,15 +62,7 @@ function parseLefthook(_filename: string, content: string): Pattern[] {
       addPattern(patterns, hook.exclude, lineMap);
     }
 
-    // Extract skip patterns
-    if (hook.skip) {
-      const skipPatterns = Array.isArray(hook.skip) ? hook.skip : [hook.skip];
-      for (const pattern of skipPatterns) {
-        if (typeof pattern === 'string') {
-          addPattern(patterns, pattern, lineMap);
-        }
-      }
-    }
+    // `skip` is skipped: it holds git states (merge, rebase) and `ref`/`run` entries, not file paths
 
     // Extract patterns from commands
     if (hook.commands && typeof hook.commands === 'object') {
