@@ -67,6 +67,17 @@ python_functions = ["test_", "it_*"]
     expect(patterns[0].type).toBe(PatternType.GLOB);
   });
 
+  it('should type pytest python_files as fnmatch patterns, not regexes', () => {
+    const content = `
+[tool.pytest.ini_options]
+python_files = ["check_v+.py"]
+`;
+    const patterns = pyprojectParser.parse('pyproject.toml', content);
+
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0].type).toBe(PatternType.PATH);
+  });
+
   it('should handle invalid TOML gracefully', () => {
     const content = `invalid toml content [[[`;
     const patterns = pyprojectParser.parse('pyproject.toml', content);
