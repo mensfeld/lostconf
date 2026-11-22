@@ -186,7 +186,7 @@ lostconf extracts and validates three types of patterns from configuration files
 
 - **File Paths**: Direct references to files or directories (e.g., `src/legacy/old.js`)
 - **Glob Patterns**: Wildcards and patterns (e.g., `**/*.test.js`, `*.py`)
-- **Regex Patterns**: Regular expressions in certain config contexts (e.g., Python test file patterns). A regex in a config inside a subdirectory is valid when it matches a file path relative to that config's directory or to the scan root
+- **Regex Patterns**: Regular expressions in certain config contexts (e.g., Python test file patterns). A regex in a config inside a subdirectory is valid when it matches a file path relative to that config's directory or to the scan root.
 
 ### Validation Strategy by Tool
 

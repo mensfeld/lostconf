@@ -208,23 +208,23 @@ describe('validatePattern', () => {
       validatePattern({ value, type: PatternType.REGEX, line: 1 }, tree, { configBasePath: 'sub' })
         .valid;
 
-    it('matches an unanchored regex against a file below the config dir', () => {
+    it('should match an unanchored regex against a file below the config dir', () => {
       expect(isValid('\\.pb\\.rb$')).toBe(true);
     });
 
-    it('matches an anchored regex against the path relative to the config dir', () => {
+    it('should match an anchored regex against the path relative to the config dir', () => {
       expect(isValid('^docs/')).toBe(true);
     });
 
-    it('matches an anchored regex against the path relative to the scan root', () => {
+    it('should match an anchored regex against the path relative to the scan root', () => {
       expect(isValid('^other/')).toBe(true);
     });
 
-    it('does not match an anchored regex against a file outside the config dir', () => {
+    it('should not match an anchored regex against a file outside the config dir', () => {
       expect(isValid('^docs/b\\.md$')).toBe(false);
     });
 
-    it('reports a regex that matches no file', () => {
+    it('should report a regex that matches no file', () => {
       expect(isValid('\\.nothing$')).toBe(false);
     });
   });
