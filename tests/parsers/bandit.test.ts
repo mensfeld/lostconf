@@ -47,7 +47,7 @@ describe('Bandit Parser', () => {
     });
   });
 
-  it('should parse tests and exclude_dirs', () => {
+  it('should not extract test IDs from tests', () => {
     const content = `tests:
   - B201
   - B301
@@ -56,10 +56,11 @@ exclude_dirs:
 
     const patterns = banditParser.parse('.bandit', content);
 
-    // Bandit parser extracts from tests, exclude_dirs, and exclude fields
-    expect(patterns.length).toBeGreaterThanOrEqual(1);
-    const values = patterns.map((p) => p.value);
-    expect(values).toContain('tests/fixtures');
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0]).toMatchObject({
+      value: 'tests/fixtures',
+      type: PatternType.PATH
+    });
   });
 
   it('should handle both exclude_dirs and exclude', () => {

@@ -133,13 +133,13 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | **Python** | pytest, coverage, mypy, ruff, black, isort | `pyproject.toml` | Test paths, source paths, exclude patterns, omit patterns |
 | | Flake8 | `.flake8`, `setup.cfg` | Exclude patterns, extend-exclude, filename patterns, per-file-ignores |
 | | Pylint | `.pylintrc`, `pylintrc` | Ignore paths, ignore patterns in `[MASTER]`/`[MAIN]` section |
-| | Bandit | `.bandit` | Exclude directories, exclude files, test paths |
+| | Bandit | `.bandit` | Exclude directories, exclude files |
 | | Pyright | `pyrightconfig.json` | `include`, `exclude`, `ignore`, `extraPaths` patterns |
 | **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Exclude patterns, ignore patterns, template paths |
 | **Ruby** | RuboCop | `.rubocop.yml` | Exclude patterns, Include patterns in AllCops |
 | | Brakeman | `config/brakeman.yml`, `.brakeman.yml` | Patterns in `skip-files` and `only-files` |
 | | Reek | `.reek.yml`, `.reek`, `config.reek` | Directory paths in `exclude_paths` |
-| | bundler-audit | `.bundler-audit.yml` | Advisory IDs in `ignore` (CVE, OSVDB, GHSA) |
+| | bundler-audit | `.bundler-audit.yml` | None: `ignore` holds advisory IDs, not paths |
 | | YARD-Lint | `.yard-lint.yml` | File patterns in global and per-validator `Exclude` |
 | **Go** | golangci-lint | `.golangci.yml` | Skip-dirs, skip-files, exclude patterns |
 | **Rust** | rustfmt | `rustfmt.toml` | Ignore patterns |
