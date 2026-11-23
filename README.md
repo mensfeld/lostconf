@@ -151,11 +151,11 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | **PHP** | PHP_CodeSniffer | `phpcs.xml` | Exclude-pattern elements |
 | | PHPStan | `phpstan.neon` | Excludes_analyse, ignoreErrors paths |
 | **Swift** | SwiftLint | `.swiftlint.yml` | Excluded paths, included paths |
-| **C/C++** | clang-tidy | `.clang-tidy` | CheckOptions paths |
-| | clang-format | `.clang-format` | File patterns |
+| **C/C++** | clang-tidy | `.clang-tidy` | `HeaderFilterRegex`, `ExcludeHeaderFilterRegex` |
+| | clang-format | `.clang-format` | None: `IncludeCategories` holds `#include` regexes and `SortIncludes` a sort mode, not paths |
 | **Scala** | Scalafmt | `.scalafmt.conf` | Project.excludeFilters |
 | | Scalafix | `.scalafix.conf` | Excludes patterns |
-| **Elixir** | Credo | `.credo.exs` | Files.excluded paths |
+| **Elixir** | Credo | `.credo.exs` | Paths, globs and regexes in `files.included` and `files.excluded`, paths in `requires` |
 | **.NET** | EditorConfig | `.editorconfig` | File globs and patterns |
 | | MSBuild | `Directory.Build.props` | Include/Exclude item patterns |
 | **Shell** | ShellCheck | `.shellcheckrc` | Source-path directives |
@@ -212,9 +212,9 @@ lostconf extracts and validates three types of patterns from configuration files
 - **Kotlin** (detekt): Exclude patterns
 - **PHP** (phpcs, phpstan): Exclude patterns and ignored paths
 - **Swift** (swiftlint): Excluded and included file paths
-- **C/C++** (clang-tidy, clang-format): File patterns and paths
+- **C/C++** (clang-tidy): Header filter regexes
 - **Scala** (scalafmt, scalafix): Exclude filters
-- **Elixir** (credo): Excluded file paths
+- **Elixir** (credo): Included and excluded file paths, required check files
 - **.NET** (editorconfig, MSBuild): File globs and item patterns
 - **ShellCheck**: Source path references
 - **yamllint**: Ignore patterns and ignore-from-file references
