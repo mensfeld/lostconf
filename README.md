@@ -135,7 +135,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | Pylint | `.pylintrc`, `pylintrc` | Ignore paths, ignore patterns in `[MASTER]`/`[MAIN]` section |
 | | Bandit | `.bandit` | Exclude directories, exclude files |
 | | Pyright | `pyrightconfig.json` | `include`, `exclude`, `ignore`, `extraPaths` patterns |
-| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Exclude patterns, ignore patterns, template paths |
+| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Template paths, library paths |
 | **Ruby** | RuboCop | `.rubocop.yml` | Exclude patterns, Include patterns in AllCops |
 | | Brakeman | `config/brakeman.yml`, `.brakeman.yml` | Patterns in `skip-files` and `only-files` |
 | | Reek | `.reek.yml`, `.reek`, `config.reek` | Directory paths in `exclude_paths` |
@@ -160,13 +160,13 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | MSBuild | `Directory.Build.props` | Include/Exclude item patterns |
 | **Shell** | ShellCheck | `.shellcheckrc` | Source-path directives |
 | **YAML** | yamllint | `.yamllint`, `.yamllint.yml` | Ignore patterns, ignore-from-file paths |
-| **Terraform** | TFLint | `.tflint.hcl` | Source paths, module directories, exclude patterns |
+| **Terraform** | TFLint | `.tflint.hcl` | Module directories, exclude patterns |
 | **Security** | Semgrep | `.semgrep.yml`, `.semgrep.yaml`, `.semgrepignore` | `paths.exclude`, `paths.include` in rules, ignore patterns |
 | | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, rule-specific allowlists |
 | **Docker** | Hadolint | `.hadolint.yaml`, `.hadolint.yml` | `ignored` patterns, `trustedRegistries` (non-URL paths) |
 | **DevOps** | ansible-lint | `.ansible-lint`, `.ansible-lint.yaml` | Patterns in `exclude_paths` list |
 | **Protocol Buffers** | buf | `buf.yaml`, `buf.work.yaml` | Patterns in `lint.ignore`, `breaking.ignore`, workspace `directories` |
-| **Git Hooks** | lefthook | `lefthook.yml`, `.lefthook.yml` | Patterns in `files`, `glob`, `exclude`, `skip` fields |
+| **Git Hooks** | lefthook | `lefthook.yml`, `.lefthook.yml` | Patterns in `files`, `glob`, `exclude` fields |
 | | pre-commit | `.pre-commit-config.yaml` | Regex patterns in top-level and hook-level `files` and `exclude` |
 | **General** | Git | `.gitignore` | All file paths and patterns |
 | | Docker | `.dockerignore` | All file paths and patterns |
@@ -218,7 +218,7 @@ lostconf extracts and validates three types of patterns from configuration files
 - **.NET** (editorconfig, MSBuild): File globs and item patterns
 - **ShellCheck**: Source path references
 - **yamllint**: Ignore patterns and ignore-from-file references
-- **Terraform** (tflint): Module sources and exclude patterns
+- **Terraform** (tflint): Module directories and exclude patterns
 
 **What the Scan Sees**
 
