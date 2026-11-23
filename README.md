@@ -128,7 +128,7 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | Biome | `biome.json`, `biome.jsonc` | Patterns in `files.ignore`, `linter.ignore`, `formatter.ignore` |
 | | Deno | `deno.json`, `deno.jsonc` | Global `exclude`, `lint.exclude/include`, `fmt.exclude/include`, `test.exclude/include` |
 | | Oxlint | `.oxlintrc.json`, `oxlint.config.json` | Patterns in `ignorePatterns` array |
-| | commitlint | `.commitlintrc`, `.commitlintrc.json` | Commit message patterns in `ignores`, file paths in `extends` |
+| | commitlint | `.commitlintrc`, `.commitlintrc.json` | File paths in `extends` |
 | | lint-staged | `.lintstagedrc`, `.lintstagedrc.json` | Object keys are glob patterns matching staged files |
 | **Python** | pytest, coverage, mypy, ruff, black, isort | `pyproject.toml` | Test paths, source paths, exclude patterns, omit patterns |
 | | Flake8 | `.flake8`, `setup.cfg` | Exclude patterns, extend-exclude, filename patterns, per-file-ignores |
@@ -151,18 +151,18 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | **PHP** | PHP_CodeSniffer | `phpcs.xml` | Exclude-pattern elements |
 | | PHPStan | `phpstan.neon` | Excludes_analyse, ignoreErrors paths |
 | **Swift** | SwiftLint | `.swiftlint.yml` | Excluded paths, included paths |
-| **C/C++** | clang-tidy | `.clang-tidy` | CheckOptions paths |
-| | clang-format | `.clang-format` | File patterns |
+| **C/C++** | clang-tidy | `.clang-tidy` | `HeaderFilterRegex`, `ExcludeHeaderFilterRegex` |
+| | clang-format | `.clang-format` | None: `IncludeCategories` holds `#include` regexes and `SortIncludes` a sort mode, not paths |
 | **Scala** | Scalafmt | `.scalafmt.conf` | Project.excludeFilters |
 | | Scalafix | `.scalafix.conf` | Excludes patterns |
-| **Elixir** | Credo | `.credo.exs` | Files.excluded paths |
+| **Elixir** | Credo | `.credo.exs` | Paths, globs and regexes in `files.included` and `files.excluded`, paths in `requires` |
 | **.NET** | EditorConfig | `.editorconfig` | File globs and patterns |
 | | MSBuild | `Directory.Build.props` | Include/Exclude item patterns |
 | **Shell** | ShellCheck | `.shellcheckrc` | Source-path directives |
 | **YAML** | yamllint | `.yamllint`, `.yamllint.yml` | Ignore patterns, ignore-from-file paths |
 | **Terraform** | TFLint | `.tflint.hcl` | Source paths, module directories, exclude patterns |
 | **Security** | Semgrep | `.semgrep.yml`, `.semgrep.yaml`, `.semgrepignore` | `paths.exclude`, `paths.include` in rules, ignore patterns |
-| | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, `allowlist.regexes`, rule-specific allowlists |
+| | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, rule-specific allowlists |
 | **Docker** | Hadolint | `.hadolint.yaml`, `.hadolint.yml` | `ignored` patterns, `trustedRegistries` (non-URL paths) |
 | **DevOps** | ansible-lint | `.ansible-lint`, `.ansible-lint.yaml` | Patterns in `exclude_paths` list |
 | **Protocol Buffers** | buf | `buf.yaml`, `buf.work.yaml` | Patterns in `lint.ignore`, `breaking.ignore`, workspace `directories` |
@@ -212,9 +212,9 @@ lostconf extracts and validates three types of patterns from configuration files
 - **Kotlin** (detekt): Exclude patterns
 - **PHP** (phpcs, phpstan): Exclude patterns and ignored paths
 - **Swift** (swiftlint): Excluded and included file paths
-- **C/C++** (clang-tidy, clang-format): File patterns and paths
+- **C/C++** (clang-tidy): Header filter regexes
 - **Scala** (scalafmt, scalafix): Exclude filters
-- **Elixir** (credo): Excluded file paths
+- **Elixir** (credo): Included and excluded file paths, required check files
 - **.NET** (editorconfig, MSBuild): File globs and item patterns
 - **ShellCheck**: Source path references
 - **yamllint**: Ignore patterns and ignore-from-file references

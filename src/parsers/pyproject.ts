@@ -7,23 +7,22 @@ import type { Pattern } from '../core/types.js';
 import { PatternType } from '../core/types.js';
 import type { Parser } from '../plugin/types.js';
 import { isGlobPattern } from '../validator/glob.js';
-import { looksLikeRegex } from '../validator/regex.js';
 
 type TomlValue = Record<string, unknown>;
 
-/** Known path/pattern fields in pyproject.toml */
+/**
+ * Known path/pattern fields in pyproject.toml. pytest `python_classes`/`python_functions`
+ * (test names) and coverage `exclude_lines` (source lines) are not paths and are left out.
+ */
 const PATTERN_FIELDS = [
   // pytest
   'tool.pytest.ini_options.testpaths',
   'tool.pytest.ini_options.python_files',
-  'tool.pytest.ini_options.python_classes',
-  'tool.pytest.ini_options.python_functions',
   'tool.pytest.ini_options.norecursedirs',
   // coverage
   'tool.coverage.run.source',
   'tool.coverage.run.omit',
   'tool.coverage.run.include',
-  'tool.coverage.report.exclude_lines',
   'tool.coverage.report.omit',
   // mypy
   'tool.mypy.exclude',
@@ -69,7 +68,7 @@ function parsePyproject(_filename: string, content: string): Pattern[] {
       const line = lineInfo?.line ?? 1;
       const column = lineInfo?.column;
 
-      const type = determinePatternType(v, fieldPath);
+      const type = determinePatternType(v);
 
       patterns.push({
         value: v,
@@ -83,20 +82,8 @@ function parsePyproject(_filename: string, content: string): Pattern[] {
   return patterns;
 }
 
-/** Determine pattern type based on value and field */
-function determinePatternType(value: string, fieldPath: string): PatternType {
-  // Regex fields
-  if (
-    fieldPath.includes('exclude_lines') ||
-    fieldPath.includes('python_files') ||
-    fieldPath.includes('python_classes') ||
-    fieldPath.includes('python_functions')
-  ) {
-    if (looksLikeRegex(value)) {
-      return PatternType.REGEX;
-    }
-  }
-
+/** Determine pattern type based on value */
+function determinePatternType(value: string): PatternType {
   // Glob patterns
   if (isGlobPattern(value)) {
     return PatternType.GLOB;

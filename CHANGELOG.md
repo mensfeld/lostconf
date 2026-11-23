@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sort findings by file, line, column and pattern, so text, JSON and SARIF output is byte-identical between runs on the same tree
 - Match regex patterns in a config inside a subdirectory against file paths relative to that config's directory or to the scan root, instead of reporting every such regex as stale
 - Stop checking phpcs and PMD `<exclude name>` (sniff codes and rule names) and SpotBugs `<Bug pattern>` (bug pattern types) as files
+- commitlint `ignores`, gitleaks `allowlist.regexes`, pytest `python_classes`/`python_functions` and coverage `exclude_lines` are no longer checked as file patterns: they match commit messages, secrets, test names and source lines, so realistic values were reported as stale. pytest `python_files` is always matched as an fnmatch pattern, never as a regex (e.g. `check_v+.py`)
+- Credo values outside `files.included`/`files.excluded` and `requires` (e.g. check params such as `ignore_names`) and clang-format `IncludeCategories` regexes and `SortIncludes` values are no longer checked as file patterns: they match module names, `#include` spellings and sort modes, not files
 
 ## [0.5.0] - 2026-11-10
 
