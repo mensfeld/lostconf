@@ -56,21 +56,7 @@ function parseGitleaks(_filename: string, content: string): Pattern[] {
       }
     }
 
-    // Extract regex patterns from allowlist
-    const regexes = allowlist.regexes as string[] | undefined;
-    if (regexes && Array.isArray(regexes)) {
-      for (const regex of regexes) {
-        if (typeof regex !== 'string') continue;
-
-        const lineInfo = lineMap.get(regex);
-        patterns.push({
-          value: regex,
-          type: PatternType.REGEX,
-          line: lineInfo?.line ?? 1,
-          column: lineInfo?.column
-        });
-      }
-    }
+    // `regexes` is skipped: gitleaks matches it against the secret, not a path
   }
 
   // Extract rules with path filters

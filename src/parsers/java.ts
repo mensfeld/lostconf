@@ -16,12 +16,11 @@ function parseJavaXmlConfig(_filename: string, content: string): Pattern[] {
   const filePatternRegexes = [
     // Checkstyle: <suppress files="..." />
     /<suppress[^>]*\sfiles\s*=\s*["']([^"']+)["']/gi,
-    // PMD: <exclude name="..." />
-    /<exclude[^>]*\sname\s*=\s*["']([^"']+)["']/gi,
+    // PMD `<exclude name="..." />` is skipped: it names a rule, not a file
     // SpotBugs: <Match><Source name="..." /></Match>
     /<Source[^>]*\sname\s*=\s*["']([^"']+)["']/gi,
-    // Generic file/path attributes
-    /<[^>]*\s(?:file|path|pattern)\s*=\s*["']([^"']+)["']/gi
+    // Generic file/path attributes (SpotBugs `<Bug pattern="..." />` names a bug pattern, not a file)
+    /<[^>]*\s(?:file|path)\s*=\s*["']([^"']+)["']/gi
   ];
 
   for (let i = 0; i < lines.length; i++) {
