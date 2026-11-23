@@ -145,8 +145,8 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | **Rust** | rustfmt | `rustfmt.toml` | Ignore patterns |
 | | Clippy | `clippy.toml` | Excluded files |
 | **Java** | Checkstyle | `checkstyle.xml` | SuppressionFilter file attributes |
-| | PMD | `pmd.xml` | Exclude patterns in rulesets |
-| | SpotBugs | `spotbugs.xml` | Match/Class elements |
+| | PMD | `pmd.xml` | File and path attributes in rulesets |
+| | SpotBugs | `spotbugs.xml` | Source elements in Match filters |
 | **Kotlin** | detekt | `detekt.yml` | Excludes patterns in config |
 | **PHP** | PHP_CodeSniffer | `phpcs.xml` | Exclude-pattern elements |
 | | PHPStan | `phpstan.neon` | Excludes_analyse, ignoreErrors paths |
@@ -208,7 +208,7 @@ lostconf extracts and validates three types of patterns from configuration files
 - **RuboCop**: Exclude/Include patterns in AllCops
 - **Go** (golangci-lint): Skip directories and files
 - **Rust** (rustfmt, clippy): Ignored file patterns
-- **Java** (checkstyle, pmd, spotbugs): Suppression files and exclude patterns
+- **Java** (checkstyle, pmd, spotbugs): Suppression files and source paths
 - **Kotlin** (detekt): Exclude patterns
 - **PHP** (phpcs, phpstan): Exclude patterns and ignored paths
 - **Swift** (swiftlint): Excluded and included file paths
