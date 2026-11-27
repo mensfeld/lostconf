@@ -32,7 +32,8 @@ function parseBandit(_filename: string, content: string): Pattern[] {
   const lineMap = buildLineMap(content);
 
   // Extract patterns from exclude_dirs and exclude
-  const sections = [config.exclude_dirs, config.exclude, config.tests];
+  // `tests` and `skips` are skipped: they hold test IDs (e.g. B201), not file paths
+  const sections = [config.exclude_dirs, config.exclude];
 
   for (const section of sections) {
     if (!section || !Array.isArray(section)) continue;

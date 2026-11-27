@@ -128,45 +128,45 @@ lostconf supports **67+ configuration files** from popular tools across **15+ la
 | | Biome | `biome.json`, `biome.jsonc` | Patterns in `files.ignore`, `linter.ignore`, `formatter.ignore` |
 | | Deno | `deno.json`, `deno.jsonc` | Global `exclude`, `lint.exclude/include`, `fmt.exclude/include`, `test.exclude/include` |
 | | Oxlint | `.oxlintrc.json`, `oxlint.config.json` | Patterns in `ignorePatterns` array |
-| | commitlint | `.commitlintrc`, `.commitlintrc.json` | Commit message patterns in `ignores`, file paths in `extends` |
+| | commitlint | `.commitlintrc`, `.commitlintrc.json` | File paths in `extends` |
 | | lint-staged | `.lintstagedrc`, `.lintstagedrc.json` | Object keys are glob patterns matching staged files |
 | **Python** | pytest, coverage, mypy, ruff, black, isort | `pyproject.toml` | Test paths, source paths, exclude patterns, omit patterns |
 | | Flake8 | `.flake8`, `setup.cfg` | Exclude patterns, extend-exclude, filename patterns, per-file-ignores |
 | | Pylint | `.pylintrc`, `pylintrc` | Ignore paths, ignore patterns in `[MASTER]`/`[MAIN]` section |
-| | Bandit | `.bandit` | Exclude directories, exclude files, test paths |
+| | Bandit | `.bandit` | Exclude directories, exclude files |
 | | Pyright | `pyrightconfig.json` | `include`, `exclude`, `ignore`, `extraPaths` patterns |
-| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Exclude patterns, ignore patterns, template paths |
+| **SQL** | SQLFluff | `.sqlfluff`, `setup.cfg` | Template paths, library paths |
 | **Ruby** | RuboCop | `.rubocop.yml` | Exclude patterns, Include patterns in AllCops |
 | | Brakeman | `config/brakeman.yml`, `.brakeman.yml` | Patterns in `skip-files` and `only-files` |
 | | Reek | `.reek.yml`, `.reek`, `config.reek` | Directory paths in `exclude_paths` |
-| | bundler-audit | `.bundler-audit.yml` | Advisory IDs in `ignore` (CVE, OSVDB, GHSA) |
+| | bundler-audit | `.bundler-audit.yml` | None: `ignore` holds advisory IDs, not paths |
 | | YARD-Lint | `.yard-lint.yml` | File patterns in global and per-validator `Exclude` |
 | **Go** | golangci-lint | `.golangci.yml` | Skip-dirs, skip-files, exclude patterns |
 | **Rust** | rustfmt | `rustfmt.toml` | Ignore patterns |
 | | Clippy | `clippy.toml` | Excluded files |
 | **Java** | Checkstyle | `checkstyle.xml` | SuppressionFilter file attributes |
-| | PMD | `pmd.xml` | Exclude patterns in rulesets |
-| | SpotBugs | `spotbugs.xml` | Match/Class elements |
+| | PMD | `pmd.xml` | File and path attributes in rulesets |
+| | SpotBugs | `spotbugs.xml` | Source elements in Match filters |
 | **Kotlin** | detekt | `detekt.yml` | Excludes patterns in config |
 | **PHP** | PHP_CodeSniffer | `phpcs.xml` | Exclude-pattern elements |
 | | PHPStan | `phpstan.neon` | Excludes_analyse, ignoreErrors paths |
 | **Swift** | SwiftLint | `.swiftlint.yml` | Excluded paths, included paths |
-| **C/C++** | clang-tidy | `.clang-tidy` | CheckOptions paths |
-| | clang-format | `.clang-format` | File patterns |
+| **C/C++** | clang-tidy | `.clang-tidy` | `HeaderFilterRegex`, `ExcludeHeaderFilterRegex` |
+| | clang-format | `.clang-format` | None: `IncludeCategories` holds `#include` regexes and `SortIncludes` a sort mode, not paths |
 | **Scala** | Scalafmt | `.scalafmt.conf` | Project.excludeFilters |
 | | Scalafix | `.scalafix.conf` | Excludes patterns |
-| **Elixir** | Credo | `.credo.exs` | Files.excluded paths |
+| **Elixir** | Credo | `.credo.exs` | Paths, globs and regexes in `files.included` and `files.excluded`, paths in `requires` |
 | **.NET** | EditorConfig | `.editorconfig` | File globs and patterns |
 | | MSBuild | `Directory.Build.props` | Include/Exclude item patterns |
 | **Shell** | ShellCheck | `.shellcheckrc` | Source-path directives |
 | **YAML** | yamllint | `.yamllint`, `.yamllint.yml` | Ignore patterns, ignore-from-file paths |
-| **Terraform** | TFLint | `.tflint.hcl` | Source paths, module directories, exclude patterns |
+| **Terraform** | TFLint | `.tflint.hcl` | Module directories, exclude patterns |
 | **Security** | Semgrep | `.semgrep.yml`, `.semgrep.yaml`, `.semgrepignore` | `paths.exclude`, `paths.include` in rules, ignore patterns |
-| | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, `allowlist.regexes`, rule-specific allowlists |
+| | Gitleaks | `.gitleaks.toml` | `allowlist.paths`, rule-specific allowlists |
 | **Docker** | Hadolint | `.hadolint.yaml`, `.hadolint.yml` | `ignored` patterns, `trustedRegistries` (non-URL paths) |
 | **DevOps** | ansible-lint | `.ansible-lint`, `.ansible-lint.yaml` | Patterns in `exclude_paths` list |
 | **Protocol Buffers** | buf | `buf.yaml`, `buf.work.yaml` | Patterns in `lint.ignore`, `breaking.ignore`, workspace `directories` |
-| **Git Hooks** | lefthook | `lefthook.yml`, `.lefthook.yml` | Patterns in `files`, `glob`, `exclude`, `skip` fields |
+| **Git Hooks** | lefthook | `lefthook.yml`, `.lefthook.yml` | Patterns in `files`, `glob`, `exclude` fields |
 | | pre-commit | `.pre-commit-config.yaml` | Regex patterns in top-level and hook-level `files` and `exclude` |
 | **General** | Git | `.gitignore` | All file paths and patterns |
 | | Docker | `.dockerignore` | All file paths and patterns |
@@ -208,17 +208,17 @@ lostconf extracts and validates three types of patterns from configuration files
 - **RuboCop**: Exclude/Include patterns in AllCops
 - **Go** (golangci-lint): Skip directories and files
 - **Rust** (rustfmt, clippy): Ignored file patterns
-- **Java** (checkstyle, pmd, spotbugs): Suppression files and exclude patterns
+- **Java** (checkstyle, pmd, spotbugs): Suppression files and source paths
 - **Kotlin** (detekt): Exclude patterns
 - **PHP** (phpcs, phpstan): Exclude patterns and ignored paths
 - **Swift** (swiftlint): Excluded and included file paths
-- **C/C++** (clang-tidy, clang-format): File patterns and paths
+- **C/C++** (clang-tidy): Header filter regexes
 - **Scala** (scalafmt, scalafix): Exclude filters
-- **Elixir** (credo): Excluded file paths
+- **Elixir** (credo): Included and excluded file paths, required check files
 - **.NET** (editorconfig, MSBuild): File globs and item patterns
 - **ShellCheck**: Source path references
 - **yamllint**: Ignore patterns and ignore-from-file references
-- **Terraform** (tflint): Module sources and exclude patterns
+- **Terraform** (tflint): Module directories and exclude patterns
 
 **What the Scan Sees**
 

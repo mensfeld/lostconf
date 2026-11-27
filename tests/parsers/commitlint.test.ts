@@ -9,21 +9,17 @@ describe('commitlintParser', () => {
     expect(commitlintParser.filePatterns).toContain('.commitlintrc.json');
   });
 
-  it('should parse ignores with regex patterns', () => {
+  it('should skip ignores, which match commit messages', () => {
     const content = `{
   "ignores": [
     "^WIP:",
     "^Merge branch",
-    "^Revert"
+    "Bump version"
   ]
 }`;
     const patterns = commitlintParser.parse('.commitlintrc.json', content);
 
-    expect(patterns).toHaveLength(3);
-    expect(patterns[0].value).toBe('^WIP:');
-    expect(patterns[0].type).toBe(PatternType.REGEX);
-    expect(patterns[1].value).toBe('^Merge branch');
-    expect(patterns[2].value).toBe('^Revert');
+    expect(patterns).toHaveLength(0);
   });
 
   it('should parse extends with file paths', () => {
@@ -69,9 +65,9 @@ describe('commitlintParser', () => {
 
   it('should track line numbers', () => {
     const content = `{
-  "ignores": [
-    "^WIP:",
-    "^Merge"
+  "extends": [
+    "./a.js",
+    "./b.js"
   ]
 }`;
     const patterns = commitlintParser.parse('.commitlintrc.json', content);

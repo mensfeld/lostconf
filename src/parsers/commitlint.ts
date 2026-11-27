@@ -6,7 +6,6 @@
 import type { Pattern } from '../core/types.js';
 import { PatternType } from '../core/types.js';
 import type { Parser } from '../plugin/types.js';
-import { looksLikeRegex } from '../validator/regex.js';
 
 interface CommitlintConfig {
   ignores?: ((commit: string) => boolean | string)[];
@@ -32,24 +31,7 @@ function parseCommitlintConfig(_filename: string, content: string): Pattern[] {
 
   const lineMap = buildLineMap(content);
 
-  // Extract ignores patterns (regex strings for commit message patterns)
-  if (Array.isArray(config.ignores)) {
-    for (const value of config.ignores) {
-      // Ignores can be functions or strings in JS, but in JSON they'll be strings
-      if (typeof value !== 'string') continue;
-      const lineInfo = lineMap.get(value);
-
-      // Commit message patterns are typically regexes
-      const type = looksLikeRegex(value) ? PatternType.REGEX : PatternType.PATH;
-
-      patterns.push({
-        value,
-        type,
-        line: lineInfo?.line ?? 1,
-        column: lineInfo?.column
-      });
-    }
-  }
+  // `ignores` is skipped: it holds commit-message matchers, not file paths
 
   // Extract extends (package names or file paths)
   if (Array.isArray(config.extends)) {

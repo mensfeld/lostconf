@@ -20,22 +20,41 @@ dialect = postgres
     expect(patterns).toHaveLength(0);
   });
 
-  it('should parse ignore patterns', () => {
+  it('should not parse ignore (error categories, not paths)', () => {
     const content = `
 [sqlfluff]
-ignore = migrations/, scripts/legacy/
+ignore = parsing,templating
 `;
     const patterns = sqlfluffParser.parse('.sqlfluff', content);
 
-    expect(patterns).toHaveLength(2);
-    expect(patterns[0].value).toBe('migrations/');
-    expect(patterns[1].value).toBe('scripts/legacy/');
+    expect(patterns).toEqual([]);
+  });
+
+  it('should not parse ignore_templated_areas (boolean, not a path)', () => {
+    const content = `
+[sqlfluff]
+ignore_templated_areas = True
+`;
+    const patterns = sqlfluffParser.parse('.sqlfluff', content);
+
+    expect(patterns).toEqual([]);
+  });
+
+  it('should parse library_path', () => {
+    const content = `
+[sqlfluff:templater:jinja]
+library_path = macros/
+`;
+    const patterns = sqlfluffParser.parse('.sqlfluff', content);
+
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0].value).toBe('macros/');
   });
 
   it('should parse glob patterns', () => {
     const content = `
 [sqlfluff]
-ignore = *.sql.j2, tests/**/*.sql
+template_path = *.sql.j2, tests/**/*.sql
 `;
     const patterns = sqlfluffParser.parse('.sqlfluff', content);
 
@@ -60,7 +79,7 @@ template_path = templates/, custom/templates/
   it('should handle continuation lines for path fields', () => {
     const content = `
 [sqlfluff]
-ignore =
+template_path =
     migrations/
     legacy/
     temp/
@@ -79,7 +98,7 @@ ignore =
 exclude = something
 
 [sqlfluff]
-ignore = migrations/
+template_path = migrations/
 
 [another_section]
 exclude = other
@@ -92,8 +111,8 @@ exclude = other
 
   it('should handle sqlfluff subsections', () => {
     const content = `
-[sqlfluff:rules]
-ignore = rules/custom/
+[sqlfluff:templater:jinja]
+library_path = rules/custom/
 
 [sqlfluff:templater]
 template_path = templates/
@@ -128,7 +147,7 @@ describe('sqlfluffSetupCfgParser', () => {
 name = myproject
 
 [sqlfluff]
-ignore = migrations/, tests/
+template_path = migrations/, tests/
 dialect = postgres
 `;
     const patterns = sqlfluffSetupCfgParser.parse('setup.cfg', content);

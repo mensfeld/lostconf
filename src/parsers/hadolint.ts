@@ -3,104 +3,14 @@
  * Hadolint is a Dockerfile linter that helps you build best practice Docker images
  */
 
-import { parse as parseYaml } from 'yaml';
 import type { Pattern } from '../core/types.js';
-import { PatternType } from '../core/types.js';
 import type { Parser } from '../plugin/types.js';
-import { isGlobPattern } from '../validator/glob.js';
-
-type HadolintConfig = {
-  ignored?: string[];
-  trustedRegistries?: string[];
-  [key: string]: unknown;
-};
 
 /** Parse .hadolint.yaml file */
-function parseHadolint(_filename: string, content: string): Pattern[] {
-  const patterns: Pattern[] = [];
-
-  let config: HadolintConfig;
-  try {
-    config = parseYaml(content) as HadolintConfig;
-  } catch {
-    return patterns;
-  }
-
-  const lineMap = buildLineMap(content);
-
-  // Extract ignored files
-  if (config.ignored && Array.isArray(config.ignored)) {
-    for (const pattern of config.ignored) {
-      if (typeof pattern !== 'string') continue;
-
-      const lineInfo = lineMap.get(pattern);
-      const line = lineInfo?.line ?? 1;
-      const column = lineInfo?.column;
-
-      const type = isGlobPattern(pattern) ? PatternType.GLOB : PatternType.PATH;
-
-      patterns.push({
-        value: pattern,
-        type,
-        line,
-        column
-      });
-    }
-  }
-
-  // Extract trusted registries (these are URLs/paths that should exist)
-  if (config.trustedRegistries && Array.isArray(config.trustedRegistries)) {
-    for (const registry of config.trustedRegistries) {
-      if (typeof registry !== 'string') continue;
-
-      // Skip if it's a URL (starts with http:// or https://)
-      if (registry.startsWith('http://') || registry.startsWith('https://')) {
-        continue;
-      }
-
-      const lineInfo = lineMap.get(registry);
-      const line = lineInfo?.line ?? 1;
-      const column = lineInfo?.column;
-
-      patterns.push({
-        value: registry,
-        type: PatternType.PATH,
-        line,
-        column
-      });
-    }
-  }
-
-  return patterns;
-}
-
-/** Build a map of string values to their line numbers */
-function buildLineMap(content: string): Map<string, { line: number; column?: number }> {
-  const map = new Map<string, { line: number; column?: number }>();
-  const lines = content.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNum = i + 1;
-
-    const quotedMatches = line.matchAll(/["']([^"']+)["']/g);
-    for (const match of quotedMatches) {
-      const value = match[1];
-      if (value && !map.has(value)) {
-        map.set(value, { line: lineNum, column: (match.index ?? 0) + 1 });
-      }
-    }
-
-    const unquotedMatch = line.match(/:\s*-\s*([^\s#]+)/);
-    if (unquotedMatch && unquotedMatch[1]) {
-      const value = unquotedMatch[1].trim();
-      if (value && !map.has(value)) {
-        map.set(value, { line: lineNum, column: (unquotedMatch.index ?? 0) + 1 });
-      }
-    }
-  }
-
-  return map;
+function parseHadolint(_filename: string, _content: string): Pattern[] {
+  // `ignored` (rule codes, e.g. DL3008) and `trustedRegistries` (registry hosts) are skipped:
+  // neither holds file paths
+  return [];
 }
 
 /** Hadolint configuration parser */

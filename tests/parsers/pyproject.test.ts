@@ -43,6 +43,41 @@ exclude = [".git", "node_modules", "*.pyi"]
     expect(patterns.some((p) => p.value === '*.pyi')).toBe(true);
   });
 
+  it('should skip coverage exclude_lines, which match source lines', () => {
+    const content = `
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", '^\\s*\\.\\.\\.$']
+omit = ["setup.py"]
+`;
+    const patterns = pyprojectParser.parse('pyproject.toml', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['setup.py']);
+  });
+
+  it('should skip pytest python_classes and python_functions, which match test names', () => {
+    const content = `
+[tool.pytest.ini_options]
+python_files = ["test_*.py"]
+python_classes = ["Test", "Describe*"]
+python_functions = ["test_", "it_*"]
+`;
+    const patterns = pyprojectParser.parse('pyproject.toml', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['test_*.py']);
+    expect(patterns[0].type).toBe(PatternType.GLOB);
+  });
+
+  it('should type pytest python_files as fnmatch patterns, not regexes', () => {
+    const content = `
+[tool.pytest.ini_options]
+python_files = ["check_v+.py"]
+`;
+    const patterns = pyprojectParser.parse('pyproject.toml', content);
+
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0].type).toBe(PatternType.PATH);
+  });
+
   it('should handle invalid TOML gracefully', () => {
     const content = `invalid toml content [[[`;
     const patterns = pyprojectParser.parse('pyproject.toml', content);

@@ -56,7 +56,7 @@ pre-commit:
     expect(pattern).toBeDefined();
   });
 
-  it('should parse skip patterns as array', () => {
+  it('should not parse skip git states as array', () => {
     const content = `
 pre-commit:
   skip:
@@ -65,21 +65,33 @@ pre-commit:
 `;
     const patterns = lefthookParser.parse('lefthook.yml', content);
 
-    const mergePattern = patterns.find((p) => p.value === 'merge');
-    const rebasePattern = patterns.find((p) => p.value === 'rebase');
-    expect(mergePattern).toBeDefined();
-    expect(rebasePattern).toBeDefined();
+    expect(patterns).toEqual([]);
   });
 
-  it('should parse skip patterns as string', () => {
+  it('should not parse skip git state as string', () => {
     const content = `
 pre-commit:
   skip: merge
 `;
     const patterns = lefthookParser.parse('lefthook.yml', content);
 
-    const pattern = patterns.find((p) => p.value === 'merge');
-    expect(pattern).toBeDefined();
+    expect(patterns).toEqual([]);
+  });
+
+  it('should not parse skip ref and run entries', () => {
+    const content = `
+pre-commit:
+  skip:
+    - merge
+    - ref: main
+    - run: test "$CI" = true
+  commands:
+    lint:
+      glob: "*.js"
+`;
+    const patterns = lefthookParser.parse('lefthook.yml', content);
+
+    expect(patterns.map((p) => p.value)).toEqual(['*.js']);
   });
 
   it('should handle empty config', () => {
