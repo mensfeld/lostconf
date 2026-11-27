@@ -26,17 +26,17 @@ paths = [
     expect(patterns[2].value).toBe('node_modules');
   });
 
-  it('should parse allowlist regexes', () => {
+  it('should skip allowlist regexes, which match secrets', () => {
     const content = `[allowlist]
 regexes = [
-  "^test_",
-  "min\\.js$"
+  '''219-09-9999''',
+  '''dummy-token-[0-9a-f]+''',
+  "^test_"
 ]`;
 
     const patterns = gitleaksParser.parse('.gitleaks.toml', content);
 
-    expect(patterns.length).toBeGreaterThanOrEqual(0);
-    // Note: regex parsing depends on pattern recognition
+    expect(patterns).toHaveLength(0);
   });
 
   it('should parse rule-specific allowlists', () => {
@@ -151,11 +151,11 @@ regexes = ["test_key"]`;
 
     const patterns = gitleaksParser.parse('.gitleaks.toml', content);
 
-    expect(patterns.length).toBeGreaterThanOrEqual(4);
+    expect(patterns).toHaveLength(3);
     const values = patterns.map((p) => p.value);
     expect(values).toContain('vendor/**');
     expect(values).toContain('node_modules');
-    expect(values).toContain('^test_.*');
+    expect(values).not.toContain('^test_.*');
     expect(values).toContain('tests/**');
   });
 });

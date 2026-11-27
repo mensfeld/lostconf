@@ -7,7 +7,7 @@ import { tflintParser } from '../../src/parsers/tflint.js';
 import { PatternType } from '../../src/core/types.js';
 
 describe('TFLint Parser', () => {
-  it('should parse .tflint.hcl with module source', () => {
+  it('should not parse plugin source (GitHub repository, not a path)', () => {
     const content = `plugin "aws" {
   enabled = true
   source  = "github.com/terraform-linters/tflint-ruleset-aws"
@@ -15,11 +15,7 @@ describe('TFLint Parser', () => {
 
     const patterns = tflintParser.parse('.tflint.hcl', content);
 
-    expect(patterns).toHaveLength(1);
-    expect(patterns[0]).toMatchObject({
-      value: 'github.com/terraform-linters/tflint-ruleset-aws',
-      type: PatternType.PATH
-    });
+    expect(patterns).toEqual([]);
   });
 
   it('should parse exclude patterns', () => {
@@ -87,11 +83,10 @@ config {
 
     const patterns = tflintParser.parse('.tflint.hcl', content);
 
-    expect(patterns).toHaveLength(4);
-    expect(patterns[0].value).toBe('github.com/terraform-linters/tflint-ruleset-aws');
-    expect(patterns[1].value).toBe('test/**');
-    expect(patterns[2].value).toBe('*.auto.tf');
-    expect(patterns[3].value).toBe('modules');
+    expect(patterns).toHaveLength(3);
+    expect(patterns[0].value).toBe('test/**');
+    expect(patterns[1].value).toBe('*.auto.tf');
+    expect(patterns[2].value).toBe('modules');
   });
 
   it('should handle comments', () => {
@@ -109,9 +104,8 @@ rule "example" {
 
     const patterns = tflintParser.parse('.tflint.hcl', content);
 
-    expect(patterns).toHaveLength(2);
-    expect(patterns[0].value).toBe('github.com/example');
-    expect(patterns[1].value).toBe('test/**');
+    expect(patterns).toHaveLength(1);
+    expect(patterns[0].value).toBe('test/**');
   });
 
   it('should handle exclude with single item', () => {
@@ -145,21 +139,5 @@ rule "example" {
     expect(patterns[0].value).toBe('tests/**');
     expect(patterns[1].value).toBe('examples/**');
     expect(patterns[2].value).toBe('*.backup.tf');
-  });
-
-  it('should parse relative and absolute paths', () => {
-    const content = `plugin "local" {
-  source = "./plugins/local"
-}
-
-plugin "remote" {
-  source = "/usr/local/tflint/plugins"
-}`;
-
-    const patterns = tflintParser.parse('.tflint.hcl', content);
-
-    expect(patterns).toHaveLength(2);
-    expect(patterns[0].value).toBe('./plugins/local');
-    expect(patterns[1].value).toBe('/usr/local/tflint/plugins');
   });
 });

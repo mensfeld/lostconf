@@ -25,8 +25,8 @@ function parseTflint(_filename: string, content: string): Pattern[] {
 
     // Look for disabled_by_default or paths in config blocks
     // Example: disabled_by_default = "path/to/file"
-    // Example: source = "path/to/module"
-    const pathMatch = trimmed.match(/(?:disabled_by_default|source|module_dir)\s*=\s*"([^"]+)"/);
+    // `source` is skipped: in a plugin block it is a GitHub host/owner/repo, not a file path
+    const pathMatch = trimmed.match(/(?:disabled_by_default|module_dir)\s*=\s*"([^"]+)"/);
     if (pathMatch) {
       const path = pathMatch[1];
       const type = isGlobPattern(path) ? PatternType.GLOB : PatternType.PATH;

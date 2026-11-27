@@ -198,6 +198,37 @@ describe('validatePattern', () => {
     });
   });
 
+  describe('regex patterns in a config inside a subdirectory', () => {
+    const tree: FileTree = {
+      files: new Set(['sub/x.pb.rb', 'sub/docs/a.md', 'other/y.txt', 'abc/docs/b.md']),
+      directories: new Set(['sub', 'sub/docs', 'other', 'abc', 'abc/docs']),
+      basePath: '/project'
+    };
+    const isValid = (value: string) =>
+      validatePattern({ value, type: PatternType.REGEX, line: 1 }, tree, { configBasePath: 'sub' })
+        .valid;
+
+    it('should match an unanchored regex against a file below the config dir', () => {
+      expect(isValid('\\.pb\\.rb$')).toBe(true);
+    });
+
+    it('should match an anchored regex against the path relative to the config dir', () => {
+      expect(isValid('^docs/')).toBe(true);
+    });
+
+    it('should match an anchored regex against the path relative to the scan root', () => {
+      expect(isValid('^other/')).toBe(true);
+    });
+
+    it('should not match an anchored regex against a file outside the config dir', () => {
+      expect(isValid('^docs/b\\.md$')).toBe(false);
+    });
+
+    it('should report a regex that matches no file', () => {
+      expect(isValid('\\.nothing$')).toBe(false);
+    });
+  });
+
   describe('default-ignored directories', () => {
     let tree: FileTree;
 

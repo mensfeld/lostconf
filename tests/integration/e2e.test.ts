@@ -690,5 +690,16 @@ src/**/*.tmp`
         ['^lib/old_\\d+\\.rb$', 'regex', 'no_matches']
       ]);
     });
+
+    it('should match a regex in a nested config against paths relative to its directory', async () => {
+      await touch('sub/lib/x.gen.rb');
+      await touch('sub/docs/a.md');
+      await writeRubocop(path.join(testDir, 'sub'), ['\\.gen\\.rb$', '^docs/', '\\.nothing$']);
+
+      const findings = (await run()).findings;
+      expect(findings.map((f) => [f.pattern, f.type, f.reason])).toEqual([
+        ['\\.nothing$', 'regex', 'no_matches']
+      ]);
+    });
   });
 });
