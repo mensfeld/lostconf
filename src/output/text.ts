@@ -19,6 +19,20 @@ const green = ansi(32, 39);
 import { Severity } from '../core/types.js';
 import type { Formatter } from './formatter.js';
 
+/** Column width of the `file:line` location */
+const LOCATION_WIDTH = 25;
+
+/** Column width of the pattern */
+const PATTERN_WIDTH = 30;
+
+/** Minimum spaces between columns */
+const MIN_GAP = 2;
+
+/** Spaces that pad `text` to `width`, leaving at least MIN_GAP */
+function getPadding(text: string, width: number): string {
+  return ' '.repeat(Math.max(width - text.length, MIN_GAP));
+}
+
 /** Format reason for display */
 function formatReason(reason: StaleReason): string {
   switch (reason) {
@@ -50,11 +64,9 @@ function formatFinding(finding: Finding): string {
   const pattern = yellow(finding.pattern);
   const reason = dim(formatReason(finding.reason));
 
-  // Calculate padding for alignment
   const locationStr = `${finding.file}:${finding.line}`;
-  const padding = Math.max(0, 25 - locationStr.length);
 
-  return `${severityIcon} ${location}${' '.repeat(padding)}${pattern.padEnd(30)}${reason}`;
+  return `${severityIcon} ${location}${getPadding(locationStr, LOCATION_WIDTH)}${pattern}${getPadding(finding.pattern, PATTERN_WIDTH)}${reason}`;
 }
 
 /** Text formatter */

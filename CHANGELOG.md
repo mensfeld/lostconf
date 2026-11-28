@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stop checking phpcs and PMD `<exclude name>` (sniff codes and rule names) and SpotBugs `<Bug pattern>` (bug pattern types) as files
 - commitlint `ignores`, gitleaks `allowlist.regexes`, pytest `python_classes`/`python_functions` and coverage `exclude_lines` are no longer checked as file patterns: they match commit messages, secrets, test names and source lines, so realistic values were reported as stale. pytest `python_files` is always matched as an fnmatch pattern, never as a regex (e.g. `check_v+.py`)
 - Credo values outside `files.included`/`files.excluded` and `requires` (e.g. check params such as `ignore_names`) and clang-format `IncludeCategories` regexes and `SortIncludes` values are no longer checked as file patterns: they match module names, `#include` spellings and sort modes, not files
+- Text output always leaves at least two spaces between location, pattern and reason, also when a value fills or overflows its column, and pads the pattern column by its visible width when colors are on
 - Config discovery skips the same default-ignored directories as the file scan (`vendor`, `.venv`, `venv`, `.tox`, `coverage`, `.next`, `__pycache__`, ...), so configs inside them (e.g. vendored gems) are no longer checked
 
 ## [0.5.0] - 2026-11-10
