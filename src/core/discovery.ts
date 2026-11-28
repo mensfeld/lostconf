@@ -5,7 +5,7 @@
 import fg from 'fast-glob';
 import path from 'path';
 import type { Parser } from '../plugin/types.js';
-import { classifyEntries } from '../filetree/scanner.js';
+import { classifyEntries, DEFAULT_IGNORE_DIRECTORIES } from '../filetree/scanner.js';
 
 export interface DiscoveryOptions {
   /** Directories to scan */
@@ -49,8 +49,8 @@ export async function discoverConfigs(
     searchPatterns = Array.from(allPatterns);
   }
 
-  // Default excludes
-  const defaultExclude = ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**'];
+  // Default excludes: the directories the file scan does not read
+  const defaultExclude = [...DEFAULT_IGNORE_DIRECTORIES].map((dir) => `**/${dir}/**`);
 
   // Find all matching config files; directory symlinks are not followed, so a
   // config is found once, at its real path, and symlink cycles cannot loop
