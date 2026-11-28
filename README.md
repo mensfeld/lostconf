@@ -228,7 +228,7 @@ lostconf checks each pattern against a scan of the files on disk. What the scan 
 - **References into default-ignored directories**: a path inside one (`vendor/gems/x.rb`), or a glob whose part before the first glob character is such a directory or inside one (`vendor/**`, `.venv/lib/**/*.py`), counts as present when that directory exists, with no deeper check. When the directory does not exist, the reference is stale.
 - **Globs above default-ignored directories**: a glob that starts above such a directory (`**/*.py`) does not match files inside it.
 - **Symlinks**: the scan does not follow directory symlinks. A symlink to a file counts as a file and a symlink to a directory counts as a directory. An exact path below a directory symlink (`link/sub/a.js`) is checked on disk, but a glob (`link/**/*.js`) does not match files behind it. A broken symlink counts as missing.
-- **Config discovery** does not follow directory symlinks either: a config file reachable only through one is not checked.
+- **Config discovery** skips the default-ignored directories too: a config file inside one (e.g., a vendored gem's `.rubocop.yml` under `vendor/bundle`) is not checked. `--exclude` skips more. Discovery does not follow directory symlinks either: a config file reachable only through one is not checked.
 - **Negated patterns** (`!pattern`) in ignore files are not checked. In other config files, the leading `!` is dropped and the rest is checked as a glob.
 
 **Ignore-File Rules**
